@@ -1508,4 +1508,9 @@ bool core::removeMessageQueue(MessageQueue<BlockchainMessage>& messageQueue) {
   return m_blockchain.removeMessageQueue(messageQueue);
 }
 
+void core::rollbackBlockchain(const uint32_t height) {
+  logger(INFO, BRIGHT_YELLOW) << "Rewinding blockchain to height: " << height;
+  m_blockchain.rollbackBlockchainTo(height);
+}
+
 }

@@ -55,6 +55,7 @@ namespace
   const command_line::arg_descriptor<std::string> arg_set_fee_address           = { "fee-address", "Sets fee address for light wallets to the daemon's RPC responses.", "" };
   const command_line::arg_descriptor<std::string> arg_set_view_key              = { "view-key", "Sets private view key to check for masternode's fee.", "" };
   const command_line::arg_descriptor<std::string> arg_set_contact               = { "contact", "Sets node admin contact", "" };
+  const command_line::arg_descriptor<std::string> arg_rollback                  = { "rollback", "Rollback blockchain to <height>" };
 
 }
 
@@ -153,6 +154,7 @@ int main(int argc, char* argv[])
 	  command_line::add_arg(desc_cmd_sett, arg_set_fee_address);
 	  command_line::add_arg(desc_cmd_sett, arg_set_view_key);
   	command_line::add_arg(desc_cmd_sett, arg_set_contact);
+	  command_line::add_arg(desc_cmd_sett, arg_rollback);
 
     RpcServerConfig::initOptions(desc_cmd_sett);
     CoreConfig::initOptions(desc_cmd_sett);
@@ -315,6 +317,18 @@ int main(int argc, char* argv[])
     }
     logger(INFO) << "Core initialized OK";
 
+    if (command_line::has_arg(vm, arg_rollback)) {
+      std::string rollback_str = command_line::get_arg(vm, arg_rollback);
+      if (!rollback_str.empty()) {
+        uint32_t _index = 0;
+        if (!Common::fromString(rollback_str, _index)) {
+          std::cout << "wrong block index parameter" << ENDL;
+          return false;
+        }
+        ccore.rollbackBlockchain(_index);
+      }
+    }
+    
     // start components
     if (!command_line::has_arg(vm, arg_console)) {
         dch.start_handling();

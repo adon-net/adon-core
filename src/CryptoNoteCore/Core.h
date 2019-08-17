@@ -158,6 +158,7 @@ namespace CryptoNote {
      uint64_t depositAmountAtHeight(size_t height) const;
      uint64_t depositInterestAtHeight(size_t height) const;
 	   bool f_getMixin(const Transaction& transaction, uint64_t& mixin);
+     virtual void rollbackBlockchain(const uint32_t height) override;
 
     bool fillBlockDetails(const CryptoNote::Block& block, BlockDetailsEx& blockDetails);
     bool fillTransactionDetails(const Transaction &tx, TransactionDetailsEx& txRpcInfo, uint64_t timestamp = 0);
