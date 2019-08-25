@@ -9,9 +9,12 @@ if (STATIC AND MSVC)
 endif()
 
 add_subdirectory(miniupnpc)
-add_subdirectory(gtest)
 
-set_property(TARGET upnpc-static gtest gtest_main PROPERTY FOLDER "external")
+if (BUILD_TESTS)
+  add_subdirectory(gtest)
+  set_property(TARGET upnpc-static gtest gtest_main PROPERTY FOLDER "external")
+endif()
+
 
 if(MSVC)
   set_property(TARGET upnpc-static APPEND_STRING PROPERTY COMPILE_FLAGS " -wd4244 -wd4267")

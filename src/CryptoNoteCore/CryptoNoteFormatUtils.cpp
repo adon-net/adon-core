@@ -514,7 +514,9 @@ bool get_block_hash(const Block& b, Hash& res) {
     return false;
   }
 
-  if (b.majorVersion >= BLOCK_MAJOR_VERSION_3) {
+  if (b.majorVersion == BLOCK_MAJOR_VERSION_3 || 
+      b.majorVersion == BLOCK_MAJOR_VERSION_4 ||
+      b.majorVersion == BLOCK_MAJOR_VERSION_5) {
     BinaryArray rootBlob;
     auto serializer = makeRootBlockSerializer(b, true, false);
     if (!toBinaryArray(serializer, rootBlob))
@@ -548,7 +550,9 @@ bool get_block_longhash(cn_context &context, const Block& b, Hash& hash) {
       return false;
     }
     cn_slow_hash_v0(context, bd.data(), bd.size(), hash);
-  } else if (b.majorVersion >= BLOCK_MAJOR_VERSION_3) {
+  } else if (b.majorVersion == BLOCK_MAJOR_VERSION_3 || 
+             b.majorVersion == BLOCK_MAJOR_VERSION_4 ||
+             b.majorVersion == BLOCK_MAJOR_VERSION_5) {
     if (!getRootBlockHashingBlob(b, bd)) {
       return false;
     }
