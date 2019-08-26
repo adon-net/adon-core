@@ -308,22 +308,21 @@ private:
   Crypto::Hash m_lastBlockHash;
 };
 
-
-Blockchain::Blockchain(const Currency& currency, tx_memory_pool& tx_pool, ILogger& logger, bool blockchainIndexesEnabled) :
-logger(logger, "Blockchain"),
-m_currency(currency),
-m_tx_pool(tx_pool),
-m_current_block_cumul_sz_limit(0),
-m_is_in_checkpoint_zone(false),
-m_checkpoints(logger),
-m_upgradeDetectorV2(currency, m_blocks, BLOCK_MAJOR_VERSION_2, logger),
-m_upgradeDetectorV3(currency, m_blocks, BLOCK_MAJOR_VERSION_3, logger),
-m_paymentIdIndex(blockchainIndexesEnabled),
-m_timestampIndex(blockchainIndexesEnabled),
-m_generatedTransactionsIndex(blockchainIndexesEnabled),
-m_orthanBlocksIndex(blockchainIndexesEnabled),
-m_blockchainIndexesEnabled(blockchainIndexesEnabled) {
-
+Blockchain::Blockchain(const Currency& currency, tx_memory_pool& tx_pool, ILogger& logger, bool blockchainIndexesEnabled) : logger(logger, "Blockchain"),
+                                                                                                                            m_currency(currency),
+                                                                                                                            m_tx_pool(tx_pool),
+                                                                                                                            m_current_block_cumul_sz_limit(0),
+                                                                                                                            m_is_in_checkpoint_zone(false),
+                                                                                                                            m_checkpoints(logger),
+                                                                                                                            m_upgradeDetectorV2(currency, m_blocks, BLOCK_MAJOR_VERSION_2, logger),
+                                                                                                                            m_upgradeDetectorV3(currency, m_blocks, BLOCK_MAJOR_VERSION_3, logger),
+                                                                                                                            m_upgradeDetectorV4(currency, m_blocks, BLOCK_MAJOR_VERSION_4, logger),
+                                                                                                                            m_upgradeDetectorV5(currency, m_blocks, BLOCK_MAJOR_VERSION_5, logger),
+                                                                                                                            m_paymentIdIndex(blockchainIndexesEnabled),
+                                                                                                                            m_timestampIndex(blockchainIndexesEnabled),
+                                                                                                                            m_generatedTransactionsIndex(blockchainIndexesEnabled),
+                                                                                                                            m_orthanBlocksIndex(blockchainIndexesEnabled),
+                                                                                                                            m_blockchainIndexesEnabled(blockchainIndexesEnabled) {
   m_outputs.set_deleted_key(0);
   m_multisignatureOutputs.set_deleted_key(0);
   Crypto::KeyImage nullImage = boost::value_initialized<decltype(nullImage)>();
@@ -466,7 +465,7 @@ bool Blockchain::init(const std::string& config_folder, bool load_existing) {
     rollbackBlockchainTo(lastValidCheckpointHeight);
   }
 
-  if (!m_upgradeDetectorV2.init() || !m_upgradeDetectorV3.init()) {
+  if (!m_upgradeDetectorV2.init() || !m_upgradeDetectorV3.init() || !m_upgradeDetectorV4.init() || !m_upgradeDetectorV5.init()) {
     logger(ERROR, BRIGHT_RED) << "Failed to initialize upgrade detector";
     return false;
   }
@@ -485,9 +484,21 @@ bool Blockchain::init(const std::string& config_folder, bool load_existing) {
       " expected=" << static_cast<int>(m_upgradeDetectorV3.targetVersion()) << ". Rollback blockchain to height=" << upgradeHeight;
     rollbackBlockchainTo(upgradeHeight);
     reinitUpgradeDetectors = true;
+  } else if (!checkUpgradeHeight(m_upgradeDetectorV4)) {
+    uint32_t upgradeHeight = m_upgradeDetectorV4.upgradeHeight();
+    logger(WARNING, BRIGHT_YELLOW) << "Invalid block version at " << upgradeHeight + 1 << ": real=" << static_cast<int>(m_blocks[upgradeHeight + 1].bl.majorVersion) << 
+    " expected=" << static_cast<int>(m_upgradeDetectorV4.targetVersion()) << ". Rollback blockchain to height=" << upgradeHeight;
+    rollbackBlockchainTo(upgradeHeight);
+    reinitUpgradeDetectors = true;
+  } else if (!checkUpgradeHeight(m_upgradeDetectorV5)) {
+    uint32_t upgradeHeight = m_upgradeDetectorV5.upgradeHeight();
+    logger(WARNING, BRIGHT_YELLOW) << "Invalid block version at " << upgradeHeight + 1 << ": real=" << static_cast<int>(m_blocks[upgradeHeight + 1].bl.majorVersion) << 
+    " expected=" << static_cast<int>(m_upgradeDetectorV5.targetVersion()) << ". Rollback blockchain to height=" << upgradeHeight;
+    rollbackBlockchainTo(upgradeHeight);
+    reinitUpgradeDetectors = true;
   }
 
-  if (reinitUpgradeDetectors && (!m_upgradeDetectorV2.init() || !m_upgradeDetectorV3.init())) {
+  if (reinitUpgradeDetectors && (!m_upgradeDetectorV2.init() || !m_upgradeDetectorV3.init() || !m_upgradeDetectorV4.init() || !m_upgradeDetectorV5.init())) {
     logger(ERROR, BRIGHT_RED) << "Failed to initialize upgrade detector";
     return false;
   }
@@ -773,7 +784,11 @@ difficulty_type Blockchain::difficultyAtHeight(uint64_t height) {
 }
 
 uint8_t Blockchain::getBlockMajorVersionForHeight(uint64_t height) const {
-  if (height > m_upgradeDetectorV3.upgradeHeight()) {
+  if (height > m_upgradeDetectorV5.upgradeHeight()) {
+    return m_upgradeDetectorV5.targetVersion();
+  } else if (height > m_upgradeDetectorV4.upgradeHeight()) {
+    return m_upgradeDetectorV4.targetVersion();
+  } else if (height > m_upgradeDetectorV3.upgradeHeight()) {
     return m_upgradeDetectorV3.targetVersion();
   } else if (height > m_upgradeDetectorV2.upgradeHeight()) {
     return m_upgradeDetectorV2.targetVersion();
@@ -1457,7 +1472,7 @@ uint32_t Blockchain::findBlockchainSupplement(const std::vector<Crypto::Hash>& q
   assert(qblock_ids.back() == m_blockIndex.getBlockId(0));
 
   std::lock_guard<decltype(m_blockchain_lock)> lk(m_blockchain_lock);
-  uint32_t blockIndex;
+  uint32_t blockIndex = 0;
   // assert above guarantees that method returns true
   m_blockIndex.findSupplement(qblock_ids, blockIndex);
   return blockIndex;
@@ -2121,18 +2136,21 @@ bool Blockchain::pushBlock(const Block& blockData, const std::vector<Transaction
 
   auto block_processing_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - blockProcessingStart).count();
 
-  logger(DEBUGGING) <<
-    "+++++ BLOCK SUCCESSFULLY ADDED" << ENDL << "id:\t" << blockHash
-    << ENDL << "PoW:\t" << proof_of_work
-    << ENDL << "HEIGHT " << block.height << ", difficulty:\t" << currentDifficulty
-    << ENDL << "block reward: " << m_currency.formatAmount(reward) << ", fee = " << m_currency.formatAmount(fee_summary)
-    << ", coinbase_blob_size: " << coinbase_blob_size << ", cumulative size: " << cumulative_block_size
-    << ", " << block_processing_time << "(" << target_calculating_time << "/" << longhash_calculating_time << ")ms";
+  logger(DEBUGGING) << "+++++ BLOCK SUCCESSFULLY ADDED" 
+                    << ENDL << "ID          " << blockHash
+                    << ENDL << "PoW         " << proof_of_work
+                    << ENDL << "HEIGHT " << block.height << ", difficulty:\t" << currentDifficulty
+                    << ENDL << "block reward: " << m_currency.formatAmount(reward) << ", fee = " << m_currency.formatAmount(fee_summary)
+                    << ", coinbase_blob_size: " << coinbase_blob_size << ", cumulative size: " << cumulative_block_size
+                    << ", " << block_processing_time << "(" << target_calculating_time << "/" << longhash_calculating_time << ")ms";
 
   bvc.m_added_to_main_chain = true;
 
   m_upgradeDetectorV2.blockPushed();
   m_upgradeDetectorV3.blockPushed();
+  m_upgradeDetectorV4.blockPushed();
+  m_upgradeDetectorV5.blockPushed();
+
   update_next_comulative_size_limit();
 
   return true;
@@ -2212,6 +2230,9 @@ void Blockchain::popBlock() {
 
   m_upgradeDetectorV2.blockPopped();
   m_upgradeDetectorV3.blockPopped();
+  m_upgradeDetectorV4.blockPopped();
+  m_upgradeDetectorV5.blockPopped();
+
 }
 
 bool Blockchain::pushTransaction(BlockEntry& block, const Crypto::Hash& transactionHash, TransactionIndex transactionIndex) {

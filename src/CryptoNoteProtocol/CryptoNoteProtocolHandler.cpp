@@ -143,6 +143,7 @@ bool CryptoNoteProtocolHandler::process_payload_sync_data(const CORE_SYNC_DATA& 
   if (context.m_state == CryptoNoteConnectionContext::state_befor_handshake && !is_inital)
     return true;
 
+  int64_t diff = static_cast<int64_t>(hshd.current_height) - static_cast<int64_t>(get_current_blockchain_height());
   if (context.m_state == CryptoNoteConnectionContext::state_synchronizing) {
   } else if (m_core.have_block(hshd.top_id)) {
     if (is_inital) {
@@ -152,12 +153,13 @@ bool CryptoNoteProtocolHandler::process_payload_sync_data(const CORE_SYNC_DATA& 
       context.m_state = CryptoNoteConnectionContext::state_normal;
     }
   } else {
-    int64_t diff = static_cast<int64_t>(hshd.current_height) - static_cast<int64_t>(get_current_blockchain_height());
+    int64_t blocks_behind = std::abs(diff);
+    int64_t days_behind = std::abs(diff) / (24 * 60 * 60 / m_currency.difficultyTarget());
 
-    logger(diff >= 0 ? (is_inital ? Logging::INFO : Logging::DEBUGGING) : Logging::TRACE, Logging::BRIGHT_YELLOW) << context <<
-      "Sync data returned unknown top block: " << get_current_blockchain_height() << " -> " << hshd.current_height
-      << " [" << std::abs(diff) << " blocks (" << std::abs(diff) / (24 * 60 * 60 / m_currency.difficultyTarget()) << " days) "
-      << (diff >= 0 ? std::string("behind") : std::string("ahead")) << "] " << std::endl << "SYNCHRONIZATION started";
+    logger(diff >= 0 ? (is_inital ? Logging::INFO : Logging::DEBUGGING) : Logging::TRACE, Logging::BRIGHT_YELLOW) 
+      << context << "Sync data returned unknown top block : "  << std::setw(6) << get_current_blockchain_height() << "/" << std::setw(6) << hshd.current_height 
+      << " [" <<  std::setw(6) << blocks_behind << " blocks (" << days_behind << " days) "
+      << (diff >= 0 ? std::string("behind") : std::string("ahead")) << "] ";
 
     logger(Logging::DEBUGGING) << "Remote top block height: " << hshd.current_height << ", id: " << hshd.top_id;
     //let the socket to send response to handshake, but request callback, to let send request data after response

@@ -425,14 +425,14 @@ bool DaemonCommandsHandler::status(const std::vector<std::string>& args) {
 
   std::cout << ENDL
     << "NETWORK         # " << ENDL
-    << "  Height      : " << height << "/" << last_known_block_index << " (" << get_sync_percentage(height, last_known_block_index) << "%) "
+    << "  Height      : " << height - 1 << "/" << last_known_block_index << " (" << get_sync_percentage(height, last_known_block_index) << "%) "
     << (synced ? "SYNCED" : "SYNCING") << (m_core.currency().isTestnet() ? " [ TESTNET ]" : " [ MAINNET ]") << ENDL
     << "  Hashrate    : " << get_mining_speed(hashrate) << ENDL
     << "  Alt blocks  : " << alt_blocks_count << ENDL
     << "  Tx pool size: " << tx_pool_size << ENDL
     << "BLOCK           # " << ENDL
-    << "  Version     : v" << (int)majorVersion << ENDL
-    << "  Difficulty  : " << difficulty << "  [ NEXT BLOCK ]" << ENDL
+    << "  Version     : V" << (int)majorVersion << ENDL
+    << "  Difficulty  : " << difficulty << "  [ NEXT BLOCK - " << height << " ]" << ENDL
     << "CONNECTIONS     # " << ENDL
     << "  Outgoing    : " << outgoing_connections_count << ENDL
     << "  Incoming    : " << incoming_connections_count << ENDL
