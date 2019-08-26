@@ -26,7 +26,9 @@ const size_t   BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW_V1					 = 11; /* changed for LW
 
 const uint64_t MONEY_SUPPLY				                           = UINT64_C(18446744000000000);
 const uint64_t GENESIS_BLOCK_REWARD                          = UINT64_C(6456360400000000);
-const unsigned EMISSION_SPEED_FACTOR                         = 19;
+const unsigned EMISSION_SPEED_FACTOR_V1                      = 19;
+const unsigned EMISSION_SPEED_FACTOR_V2                      = 20;
+const unsigned EMISSION_SPEED_FACTOR_V3                      = 21;
 
 const size_t   CRYPTONOTE_REWARD_BLOCKS_WINDOW               = 100;
 const size_t   CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE     = 100000; //size of block (bytes) after which reward for block calculated using block size
@@ -95,6 +97,10 @@ const size_t   FUSION_TX_MIN_IN_OUT_COUNT_RATIO              = 4;
 
 const uint32_t UPGRADE_HEIGHT_V2                             = 1;
 const uint32_t UPGRADE_HEIGHT_V3                             = 2;
+const uint32_t UPGRADE_HEIGHT_V4                             = 75000;
+const uint32_t UPGRADE_HEIGHT_V5                             = 100000;
+const uint32_t UPGRADE_HEIGHT_V6                             = 999999999;
+
 const unsigned UPGRADE_VOTING_THRESHOLD                      = 90;               // percent
 const size_t   UPGRADE_VOTING_WINDOW                         = EXPECTED_NUMBER_OF_BLOCKS_PER_DAY;  // blocks
 const size_t   UPGRADE_WINDOW                                = EXPECTED_NUMBER_OF_BLOCKS_PER_DAY;  // blocks
@@ -110,10 +116,6 @@ const char     CRYPTONOTE_BLOCKCHAIN_INDICES_FILENAME[]      = "blockchainindice
 const char     MINER_CONFIG_FILE_NAME[]                      = "miner_conf.json";
 } // parameters
 
-// const uint64_t START_BLOCK_REWARD                            = (UINT64_C(320000) * parameters::COIN);
-// const uint64_t MIN_BLOCK_REWARD                              = (UINT64_C(150) * parameters::COIN);
-// const uint64_t REWARD_HALVING_INTERVAL                       = (UINT64_C(11000));
-
 const char     CRYPTONOTE_NAME[]                             = "adon";
 const char     CRYPTONOTE_TICKER[]                           = "ADON";
 const char     GENESIS_COINBASE_TX_HEX[]                     = "010a01ff000180a8bce1e880bc0b024d940423823cd51fa2351f38f0f999f1ad2e80350ae07944ab8f15728edac9352101a930bd071c6d28bb938e3224b272226c550bc4a381505db82d43b4e9e6140ba8";
@@ -125,20 +127,23 @@ const uint8_t  TRANSACTION_VERSION_2                         = 2;
 const uint8_t  BLOCK_MAJOR_VERSION_1                         = 1;
 const uint8_t  BLOCK_MAJOR_VERSION_2                         = 2;
 const uint8_t  BLOCK_MAJOR_VERSION_3                         = 3;
+const uint8_t  BLOCK_MAJOR_VERSION_4                         = 4;
+const uint8_t  BLOCK_MAJOR_VERSION_5                         = 5;
+const uint8_t  BLOCK_MAJOR_VERSION_6                         = 6;
 const uint8_t  BLOCK_MINOR_VERSION_0                         = 0;
 const uint8_t  BLOCK_MINOR_VERSION_1                         = 1;
 
 const size_t   BLOCKS_IDS_SYNCHRONIZING_DEFAULT_COUNT        = 10000;  //by default, blocks ids count in synchronizing
-const size_t   BLOCKS_SYNCHRONIZING_DEFAULT_COUNT            = 256;    //by default, blocks count in blocks downloading
+const size_t   BLOCKS_SYNCHRONIZING_DEFAULT_COUNT            = 100;    //by default, blocks count in blocks downloading
 const size_t   COMMAND_RPC_GET_BLOCKS_FAST_MAX_COUNT         = 1000;
 
 const int      P2P_DEFAULT_PORT                              = 19900;
 const int      RPC_DEFAULT_PORT                              = 19901;
 
-const size_t   P2P_LOCAL_WHITE_PEERLIST_LIMIT                = 1000;
-const size_t   P2P_LOCAL_GRAY_PEERLIST_LIMIT                 = 5000;
+const size_t   P2P_LOCAL_WHITE_PEERLIST_LIMIT                = 2000;
+const size_t   P2P_LOCAL_GRAY_PEERLIST_LIMIT                 = 8000;
 
-const size_t   P2P_CONNECTION_MAX_WRITE_BUFFER_SIZE          = 64 * 1024 * 1024; // 64 MB
+const size_t   P2P_CONNECTION_MAX_WRITE_BUFFER_SIZE          = 256 * 1024 * 1024; // 256 MB
 const uint32_t P2P_DEFAULT_CONNECTIONS_COUNT                 = 8;
 const size_t   P2P_DEFAULT_WHITELIST_CONNECTIONS_PERCENT     = 70;
 const uint32_t P2P_DEFAULT_HANDSHAKE_INTERVAL                = 60;            // seconds
@@ -167,7 +172,15 @@ __attribute__((unused))
 // You may add here other checkpoints using the following format:
 // {<block height>, "<block hash>"},
 const std::initializer_list<CheckpointData> CHECKPOINTS = {
-  
+  {  5000, "f6ecfb7fd0527cf7baf51e6626cc921fa6db73403d9e33f2e8c78465926c3d0b" },
+  { 10000, "fe3cee2b2853395a19c3d4c9f15e5e354460f8e6e868313c9539016985498780" },
+  { 20000, "5c2bc247683f369d6aca1ddb1407e0d38f3cfda22d712f66acaac246514fa88e" },
+  { 30000, "2bbdf4349ae1a94d3178b4fa36f1fa8bb35caa518300a8f0be3a52ed4f057f22" },
+  { 40000, "8b70c42d72e9e4d36737d4c7d12fa3151db15426b6b20fc0c7aa112b2f53a095" },
+  { 50000, "42c5bc70a7aeeade1ec9853ab55c34a26e16bbe49c5fa3fa366c8a3a1258f6d7" },
+  { 60000, "9055e1a362c9711761cbcceb8c5d6fc993f896a9ec9e254807824462320dd782" },
+  { 65000, "1eaade74fee6f70821dee24260ef0deb67a0d9ba1dd58de4c8c6d09621894371" }
+
 };
 
 } // CryptoNote

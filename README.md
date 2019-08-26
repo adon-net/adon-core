@@ -2,7 +2,7 @@
 
 ### On *nix:
 
-Dependencies: GCC 4.7.3 or later, CMake 2.8.6 or later, and Boost 1.55 or later.
+Dependencies: GCC 5.5.0 or later, CMake 3+ or later, and Boost 1.55 or later.
 
 You may download them from:
 

@@ -105,6 +105,7 @@ public:
   
   virtual uint8_t getBlockMajorVersionForHeight(uint32_t height) = 0;
   virtual uint8_t getCurrentBlockMajorVersion() = 0;
+  virtual void rollbackBlockchain(const uint32_t height) = 0;
 
   virtual std::unique_ptr<IBlock> getBlock(const Crypto::Hash& blocksId) = 0;
   virtual bool handleIncomingTransaction(const Transaction& tx, const Crypto::Hash& txHash, size_t blobSize, tx_verification_context& tvc, bool keptByBlock) = 0;
@@ -112,6 +113,7 @@ public:
 
   virtual bool addMessageQueue(MessageQueue<BlockchainMessage>& messageQueue) = 0;
   virtual bool removeMessageQueue(MessageQueue<BlockchainMessage>& messageQueue) = 0;
+
 };
 
 } //namespace CryptoNote

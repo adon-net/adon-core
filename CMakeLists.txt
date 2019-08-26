@@ -24,7 +24,7 @@ endfunction()
 
 cmake_policy(SET CMP0048 NEW)
 
-set(VERSION_MAJOR "1")
+set(VERSION_MAJOR "2")
 set(VERSION_MINOR "0")
 set(VERSION_PATCH "0")
 # set(VERSION_BUILD_TYPE "${CMAKE_BUILD_TYPE}")
@@ -38,16 +38,15 @@ set(CMAKE_CONFIGURATION_TYPES Debug RelWithDebInfo Release CACHE TYPE INTERNAL)
 set(CMAKE_SKIP_INSTALL_RULES OFF)
 set(CMAKE_SKIP_PACKAGE_ALL_DEPENDENCY ON)
 set(CMAKE_SUPPRESS_REGENERATION ON)
-set(BUILD_TESTS ON CACHE STRING "Spend time making tests? Defaults to ON")
+set(BUILD_TESTS OFF CACHE STRING "Spend time making tests? Defaults to ON")
 set(STATIC ON CACHE BOOL "Link libraries statically")
 set(PORTABLE ON CACHE STRING "Defaults to ON")
 
 if(BUILD_TESTS)
   enable_testing()
+  # copy CTestCustom.cmake to build dir to disable long running tests in 'make test'
+  configure_file(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR})
 endif()
-
-# copy CTestCustom.cmake to build dir to disable long running tests in 'make test'
-configure_file(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR})
 
 project(Adon)
 
@@ -257,6 +256,7 @@ elseif(DEFINED COMMIT_ID_IN_VERSION)
         string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1" VERSION_SHA1 "${TAGS}")
         if(${TAGS} MATCHES "Dirty$")
           set(VERSION_DIRTY "Dirty")
+          set(CMAKE_BUILD_TYPE "Debug")
         endif()
         set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.${COMMIT_ID} ${VERSION_DIRTY}")
 
@@ -279,7 +279,7 @@ endif()
  
 string(TIMESTAMP timestamp "%y%m%d.%H%M%S" UTC)
 
-message(STATUS "------------------------- ADON BUILD DETALS ------------------------")
+message(STATUS "------------------------- ADON BUILD DETAILS ------------------------")
 message(STATUS "version     : ${VERSION_SHORT}")
 message(STATUS "Build       : ${VERSION_BUILD_TYPE}")
 message(STATUS "Compiler    : ${CMAKE_C_COMPILER_ID} version ${CMAKE_CXX_COMPILER_VERSION}")

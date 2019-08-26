@@ -100,19 +100,27 @@ bool Currency::generateGenesisBlock() {
   return true;
 }
 
-uint64_t Currency::baseRewardFunction(uint64_t alreadyGeneratedCoins) const {
+uint64_t Currency::baseRewardFunction(uint64_t alreadyGeneratedCoins, uint8_t blockMajorVersion) const {
   if (alreadyGeneratedCoins == 0) return parameters::GENESIS_BLOCK_REWARD;
    
-  uint64_t base_reward = (m_moneySupply - alreadyGeneratedCoins) >> m_emissionSpeedFactor;
-  
+  if(blockMajorVersion >= BLOCK_MAJOR_VERSION_5)
+    return (m_moneySupply - alreadyGeneratedCoins) >> m_emissionSpeedFactor_v3;
+  if(blockMajorVersion >= BLOCK_MAJOR_VERSION_4)
+    return (m_moneySupply - alreadyGeneratedCoins) >> m_emissionSpeedFactor_v2;
+  else 
+    return (m_moneySupply - alreadyGeneratedCoins) >> m_emissionSpeedFactor_v1;
+
   // uint64_t base_reward = START_BLOCK_REWARD >> (static_cast<uint64_t>(height) / REWARD_HALVING_INTERVAL);
   // base_reward = (std::max)(base_reward, MIN_BLOCK_REWARD);
   // base_reward = (std::min)(base_reward, m_moneySupply - alreadyGeneratedCoins);
-  return base_reward;
 }
 
 size_t Currency::blockGrantedFullRewardZoneByBlockVersion(uint8_t blockMajorVersion) const {
-    if (blockMajorVersion >= BLOCK_MAJOR_VERSION_3) {
+    if (blockMajorVersion >= BLOCK_MAJOR_VERSION_5) {
+        return m_blockGrantedFullRewardZone;
+    } else if (blockMajorVersion == BLOCK_MAJOR_VERSION_4) {
+        return m_blockGrantedFullRewardZone;
+    } else if (blockMajorVersion == BLOCK_MAJOR_VERSION_3) {
         return m_blockGrantedFullRewardZone;
     } else if (blockMajorVersion == BLOCK_MAJOR_VERSION_2) {
         return CryptoNote::parameters::CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V2;
@@ -126,15 +134,23 @@ uint64_t Currency::upgradeHeight(uint8_t majorVersion) const {
     return m_upgradeHeightV2;
   } else if (majorVersion == BLOCK_MAJOR_VERSION_3) {
     return m_upgradeHeightV3;
+  } else if (majorVersion == BLOCK_MAJOR_VERSION_4) {
+    return m_upgradeHeightV4;
+  } else if (majorVersion == BLOCK_MAJOR_VERSION_5) {
+    return m_upgradeHeightV5;
   } else {
     return static_cast<uint32_t>(-1);
   }
 }
 
-uint8_t getBlockMajorVersionForHeight(uint32_t height){
-  if(height > CryptoNote::parameters::UPGRADE_HEIGHT_V3 ){
+uint8_t getBlockMajorVersionForHeight(uint32_t height) {
+  if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V5) {
+    return BLOCK_MAJOR_VERSION_5;
+  } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V4) {
+    return BLOCK_MAJOR_VERSION_4;
+  } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V3) {
     return BLOCK_MAJOR_VERSION_3;
-  } else if ( height > CryptoNote::parameters::UPGRADE_HEIGHT_V2 ){
+  } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V2) {
     return BLOCK_MAJOR_VERSION_2;
   } else {
     return BLOCK_MAJOR_VERSION_1;
@@ -144,9 +160,9 @@ uint8_t getBlockMajorVersionForHeight(uint32_t height){
 bool Currency::getBlockReward(uint8_t blockMajorVersion, size_t medianSize, size_t currentBlockSize, uint64_t alreadyGeneratedCoins,
   uint64_t fee, uint64_t& reward, int64_t& emissionChange) const {
   assert(alreadyGeneratedCoins <= m_moneySupply);
-  assert(m_emissionSpeedFactor > 0 && m_emissionSpeedFactor <= 8 * sizeof(uint64_t));
+  assert(m_emissionSpeedFactor_v1 > 0 && m_emissionSpeedFactor_v1 <= 8 * sizeof(uint64_t));
 
-  uint64_t baseReward = baseRewardFunction(alreadyGeneratedCoins);
+  uint64_t baseReward = baseRewardFunction(alreadyGeneratedCoins, blockMajorVersion);
   size_t blockGrantedFullRewardZone = blockGrantedFullRewardZoneByBlockVersion(blockMajorVersion);
   medianSize = std::max(medianSize, blockGrantedFullRewardZone);
   if (currentBlockSize > UINT64_C(2) * medianSize) {
@@ -503,17 +519,15 @@ uint64_t Currency::getMinimalFee(std::vector<uint64_t> timestamps,
   return parameters::MINIMUM_FEE;
 }
 
-difficulty_type Currency::nextDifficulty(uint8_t blockMajorVersion, std::vector<uint64_t> timestamps,
-  std::vector<difficulty_type> cumulativeDifficulties) const {
-
+difficulty_type Currency::nextDifficulty(uint8_t blockMajorVersion, std::vector<uint64_t> timestamps, std::vector<difficulty_type> cumulativeDifficulties) const {
   if (blockMajorVersion >= BLOCK_MAJOR_VERSION_3) {
-    return nextDifficultyV2(timestamps, cumulativeDifficulties);
+    return nextDifficultyV2(blockMajorVersion, timestamps, cumulativeDifficulties);
   } else {
-    return nextDifficultyV1(timestamps, cumulativeDifficulties);
+    return nextDifficultyV1(blockMajorVersion, timestamps, cumulativeDifficulties);
   }
 }
 
-difficulty_type Currency::nextDifficultyV1(std::vector<uint64_t> timestamps, std::vector<difficulty_type> cumulativeDifficulties) const {
+difficulty_type Currency::nextDifficultyV1(uint8_t blockMajorVersion, std::vector<uint64_t> timestamps, std::vector<difficulty_type> cumulativeDifficulties) const {
   assert(m_difficultyWindow >= 2);
 
   if (timestamps.size() > m_difficultyWindow) {
@@ -578,9 +592,8 @@ difficulty_type Currency::nextDifficultyV1(std::vector<uint64_t> timestamps, std
 // https://github.com/graft-project/GraftNetwork/pull/118/files
 
 // difficulty_type should be uint64_t
-difficulty_type Currency::nextDifficultyV2(std::vector<std::uint64_t> timestamps, std::vector<difficulty_type> cumulative_difficulties) const {
-
-  uint64_t T    = 120; // target solvetime seconds
+difficulty_type Currency::nextDifficultyV2(uint8_t blockMajorVersion, std::vector<std::uint64_t> timestamps, std::vector<difficulty_type> cumulative_difficulties) const {
+  uint64_t T    = m_difficultyTarget; // target solvetime seconds
   uint64_t N    = 60; //  N=45, 60, and 90 for T=600, 120, 60.
   uint64_t L(0), ST, sum_3_ST(0), next_D, prev_D, this_timestamp, previous_timestamp;
  
@@ -624,7 +637,13 @@ difficulty_type Currency::nextDifficultyV2(std::vector<std::uint64_t> timestamps
 
     // If last 3 solvetimes were so fast it's probably a jump in hashrate, increase D 8%.
     // delete the following line if you do not want the "jump rule"
-    if ( sum_3_ST < (8*T)/10) {  next_D = std::max(next_D,(prev_D*108)/100); }
+    if ( sum_3_ST < (8*T)/10) {  
+      if(blockMajorVersion == BLOCK_MAJOR_VERSION_3){  
+        next_D = std::max(next_D,(prev_D*108)/100); 
+        } else {  
+          next_D = std::max(next_D,(prev_D*110)/100);  
+        }
+    }
 
    return next_D;
 
@@ -690,6 +709,8 @@ bool Currency::checkProofOfWork(Crypto::cn_context& context, const Block& block,
     return checkProofOfWorkV1(context, block, currentDiffic, proofOfWork);
   case BLOCK_MAJOR_VERSION_2:
   case BLOCK_MAJOR_VERSION_3:
+  case BLOCK_MAJOR_VERSION_4:
+  case BLOCK_MAJOR_VERSION_5:
     return checkProofOfWorkV2(context, block, currentDiffic, proofOfWork);
   }
 
@@ -734,7 +755,9 @@ CurrencyBuilder::CurrencyBuilder(Logging::ILogger& log) : m_currency(log) {
 	blockFutureTimeLimit_v1(parameters::CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_V1);
 
   moneySupply(parameters::MONEY_SUPPLY);
-  emissionSpeedFactor(parameters::EMISSION_SPEED_FACTOR);
+  emissionSpeedFactor_v1(parameters::EMISSION_SPEED_FACTOR_V1);
+  emissionSpeedFactor_v2(parameters::EMISSION_SPEED_FACTOR_V2);
+  emissionSpeedFactor_v3(parameters::EMISSION_SPEED_FACTOR_V3);
 
   rewardBlocksWindow(parameters::CRYPTONOTE_REWARD_BLOCKS_WINDOW);
   blockGrantedFullRewardZone(parameters::CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE);
@@ -774,6 +797,9 @@ CurrencyBuilder::CurrencyBuilder(Logging::ILogger& log) : m_currency(log) {
 
   upgradeHeightV2(parameters::UPGRADE_HEIGHT_V2);
   upgradeHeightV3(parameters::UPGRADE_HEIGHT_V3);
+  upgradeHeightV4(parameters::UPGRADE_HEIGHT_V4);
+  upgradeHeightV5(parameters::UPGRADE_HEIGHT_V5);
+
   upgradeVotingThreshold(parameters::UPGRADE_VOTING_THRESHOLD);
   upgradeVotingWindow(parameters::UPGRADE_VOTING_WINDOW);
   upgradeWindow(parameters::UPGRADE_WINDOW);
@@ -799,12 +825,30 @@ Transaction CurrencyBuilder::generateGenesisTransaction() {
   return tx;
 }
 
-CurrencyBuilder& CurrencyBuilder::emissionSpeedFactor(unsigned int val) {
+CurrencyBuilder& CurrencyBuilder::emissionSpeedFactor_v1(unsigned int val) {
   if (val <= 0 || val > 8 * sizeof(uint64_t)) {
-    throw std::invalid_argument("val at emissionSpeedFactor()");
+    throw std::invalid_argument("val at emissionSpeedFactor_v1()");
   }
 
-  m_currency.m_emissionSpeedFactor = val;
+  m_currency.m_emissionSpeedFactor_v1 = val;
+  return *this;
+}
+
+CurrencyBuilder& CurrencyBuilder::emissionSpeedFactor_v2(unsigned int val) {
+  if (val <= 0 || val > 8 * sizeof(uint64_t)) {
+    throw std::invalid_argument("val at emissionSpeedFactor_v2()");
+  }
+
+  m_currency.m_emissionSpeedFactor_v2 = val;
+  return *this;
+}
+
+CurrencyBuilder& CurrencyBuilder::emissionSpeedFactor_v3(unsigned int val) {
+  if (val <= 0 || val > 8 * sizeof(uint64_t)) {
+    throw std::invalid_argument("val at emissionSpeedFactor_v3()");
+  }
+
+  m_currency.m_emissionSpeedFactor_v3 = val;
   return *this;
 }
 
