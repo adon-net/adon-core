@@ -15,8 +15,6 @@
 using namespace std;
 typedef Crypto::Hash chash;
 
-Crypto::cn_context *context;
-
 extern "C" {
 #ifdef _MSC_VER
 #pragma warning(disable: 4297)
@@ -64,9 +62,7 @@ int main(int argc, char *argv[]) {
       break;
     }
   }
-  if (f == slow_hash) {
-    context = new Crypto::cn_context();
-  }
+
   input.open(argv[2], ios_base::in);
   for (;;) {
     ++test;

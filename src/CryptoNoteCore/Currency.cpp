@@ -650,25 +650,25 @@ difficulty_type Currency::nextDifficultyV2(uint8_t blockMajorVersion, std::vecto
     // next_Target = sumTargets*L*2/0.998/T/(N+1)/N/N; // To show the difference.
 }
 
-bool Currency::checkProofOfWorkV1(Crypto::cn_context& context, const Block& block, difficulty_type currentDiffic,
+bool Currency::checkProofOfWorkV1(const Block& block, difficulty_type currentDiffic,
   Crypto::Hash& proofOfWork) const {
   if (block.majorVersion > BLOCK_MAJOR_VERSION_2) {
     return false;
   }
 
-  if (!get_block_longhash(context, block, proofOfWork)) {
+  if (!get_block_longhash(block, proofOfWork)) {
     return false;
   }
 
   return check_hash(proofOfWork, currentDiffic);
 }
 
-bool Currency::checkProofOfWorkV2(Crypto::cn_context& context, const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const {
+bool Currency::checkProofOfWorkV2(const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const {
   if (block.majorVersion < BLOCK_MAJOR_VERSION_2) {
     return false;
   }
 
-  if (!get_block_longhash(context, block, proofOfWork)) {
+  if (!get_block_longhash(block, proofOfWork)) {
     return false;
   }
 
@@ -703,15 +703,15 @@ bool Currency::checkProofOfWorkV2(Crypto::cn_context& context, const Block& bloc
   return true;
 }
 
-bool Currency::checkProofOfWork(Crypto::cn_context& context, const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const {
+bool Currency::checkProofOfWork(const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const {
   switch (block.majorVersion) {
   case BLOCK_MAJOR_VERSION_1:
-    return checkProofOfWorkV1(context, block, currentDiffic, proofOfWork);
+    return checkProofOfWorkV1(block, currentDiffic, proofOfWork);
   case BLOCK_MAJOR_VERSION_2:
   case BLOCK_MAJOR_VERSION_3:
   case BLOCK_MAJOR_VERSION_4:
   case BLOCK_MAJOR_VERSION_5:
-    return checkProofOfWorkV2(context, block, currentDiffic, proofOfWork);
+    return checkProofOfWorkV2(block, currentDiffic, proofOfWork);
   }
 
   logger(ERROR, BRIGHT_RED) << "Unknown block major version: " << block.majorVersion << "." << block.minorVersion;

@@ -44,21 +44,21 @@ namespace Crypto {
 #include "random.h"
   }
 
-  static inline unsigned char *operator &(EllipticCurvePoint &point) {
-    return &reinterpret_cast<unsigned char &>(point);
-  }
+  // static inline unsigned char *operator &(EllipticCurvePoint &point) {
+  //   return &reinterpret_cast<unsigned char &>(point);
+  // }
 
-  static inline const unsigned char *operator &(const EllipticCurvePoint &point) {
-    return &reinterpret_cast<const unsigned char &>(point);
-  }
+  // static inline const unsigned char *operator &(const EllipticCurvePoint &point) {
+  //   return &reinterpret_cast<const unsigned char &>(point);
+  // }
 
-  static inline unsigned char *operator &(EllipticCurveScalar &scalar) {
-    return &reinterpret_cast<unsigned char &>(scalar);
-  }
+  // static inline unsigned char *operator &(EllipticCurveScalar &scalar) {
+  //   return &reinterpret_cast<unsigned char &>(scalar);
+  // }
 
-  static inline const unsigned char *operator &(const EllipticCurveScalar &scalar) {
-    return &reinterpret_cast<const unsigned char &>(scalar);
-  }
+  // static inline const unsigned char *operator &(const EllipticCurveScalar &scalar) {
+  //   return &reinterpret_cast<const unsigned char &>(scalar);
+  // }
 
   mutex random_lock;
 
@@ -83,37 +83,38 @@ namespace Crypto {
   }
 
   SecretKey crypto_ops::generate_m_keys(PublicKey &pub, SecretKey &sec, const SecretKey &recovery_key, bool recover) {
-      lock_guard<mutex> lock(random_lock);
-      ge_p3             point;
-      SecretKey         rng;
-      if (recover) {
-          rng = recovery_key;
-      } else {
-          random_scalar(reinterpret_cast<EllipticCurveScalar &>(rng));
-      }
-      sec = rng;
-      sc_reduce32(reinterpret_cast<unsigned char *>(&sec));  // reduce in case second round of keys (sendkeys)
-      ge_scalarmult_base(&point, reinterpret_cast<unsigned char *>(&sec));
-      ge_p3_tobytes(reinterpret_cast<unsigned char *>(&pub), &point);
+    lock_guard<mutex> lock(random_lock);
+    ge_p3             point;
+    SecretKey         rng;
+    if (recover) {
+        rng = recovery_key;
+    } else {
+        random_scalar(reinterpret_cast<EllipticCurveScalar &>(rng));
+    }
+    sec = rng;
+    sc_reduce32(reinterpret_cast<unsigned char *>(&sec));  // reduce in case second round of keys (sendkeys)
+    ge_scalarmult_base(&point, reinterpret_cast<unsigned char *>(&sec));
+    ge_p3_tobytes(reinterpret_cast<unsigned char *>(&pub), &point);
 
-      return rng;
+    return rng;
   }
 
   void crypto_ops::generate_deterministic_keys(PublicKey &pub, SecretKey &sec, SecretKey &second) {
-      lock_guard<mutex> lock(random_lock);
-      ge_p3             point;
-      sec = second;
-      sc_reduce32(reinterpret_cast<unsigned char *>(&sec));  // reduce in case second round of keys (sendkeys)
-      ge_scalarmult_base(&point, reinterpret_cast<unsigned char *>(&sec));
-      ge_p3_tobytes(reinterpret_cast<unsigned char *>(&pub), &point);
+    lock_guard<mutex> lock(random_lock);
+    ge_p3             point;
+    sec = second;
+    sc_reduce32(reinterpret_cast<unsigned char *>(&sec));  // reduce in case second round of keys (sendkeys)
+    ge_scalarmult_base(&point, reinterpret_cast<unsigned char *>(&sec));
+    ge_p3_tobytes(reinterpret_cast<unsigned char *>(&pub), &point);
   }
-void crypto_ops::generate_keys_from_seed(PublicKey &pub, SecretKey &sec, SecretKey &seed) {
-  ge_p3 point;
-  sec = seed;
-  sc_reduce32(reinterpret_cast<unsigned char*>(&sec));
-  ge_scalarmult_base(&point, reinterpret_cast<unsigned char*>(&sec));
-  ge_p3_tobytes(reinterpret_cast<unsigned char*>(&pub), &point);
-}
+
+  void crypto_ops::generate_keys_from_seed(PublicKey &pub, SecretKey &sec, SecretKey &seed) {
+    ge_p3 point;
+    sec = seed;
+    sc_reduce32(reinterpret_cast<unsigned char*>(&sec));
+    ge_scalarmult_base(&point, reinterpret_cast<unsigned char*>(&sec));
+    ge_p3_tobytes(reinterpret_cast<unsigned char*>(&pub), &point);
+  }
 
   bool crypto_ops::check_key(const PublicKey &key) {
     ge_p3 point;
@@ -406,72 +407,73 @@ void crypto_ops::generate_keys_from_seed(PublicKey &pub, SecretKey &sec, SecretK
     sc_mulsub(reinterpret_cast<unsigned char*>(&sig) + 32, reinterpret_cast<unsigned char*>(&sig), reinterpret_cast<const unsigned char*>(&r), reinterpret_cast<unsigned char*>(&k));
   }
 
+  // FIX ME
   bool crypto_ops::check_tx_proof(const Hash &prefix_hash, const PublicKey &R, const PublicKey &A, const PublicKey &D, const Signature &sig) {
-    // sanity check
-    ge_p3 R_p3;
-    ge_p3 A_p3;
-    ge_p3 D_p3;
-    if (ge_frombytes_vartime(&R_p3, reinterpret_cast<const unsigned char*>(&R)) != 0) return false;
-    if (ge_frombytes_vartime(&A_p3, reinterpret_cast<const unsigned char*>(&A)) != 0) return false;
-    if (ge_frombytes_vartime(&D_p3, reinterpret_cast<const unsigned char*>(&D)) != 0) return false;
-    if (sc_check(reinterpret_cast<const unsigned char*>(&sig)) != 0 || sc_check(reinterpret_cast<const unsigned char*>(&sig) + 32) != 0) return false;
+    // // sanity check
+    // ge_p3 R_p3;
+    // ge_p3 A_p3;
+    // ge_p3 D_p3;
+    // if (ge_frombytes_vartime(&R_p3, reinterpret_cast<const unsigned char*>(&R)) != 0) return false;
+    // if (ge_frombytes_vartime(&A_p3, reinterpret_cast<const unsigned char*>(&A)) != 0) return false;
+    // if (ge_frombytes_vartime(&D_p3, reinterpret_cast<const unsigned char*>(&D)) != 0) return false;
+    // if (sc_check(reinterpret_cast<const unsigned char*>(&sig)) != 0 || sc_check(reinterpret_cast<const unsigned char*>(&sig) + 32) != 0) return false;
 
-    // compute sig.c*R
-    ge_p2 cR_p2;
-    ge_scalarmult(&cR_p2, reinterpret_cast<const unsigned char*>(&sig), &R_p3);
+    // // compute sig.c*R
+    // ge_p2 cR_p2;
+    // ge_scalarmult(&cR_p2, reinterpret_cast<const unsigned char*>(&sig), &R_p3);
 
-    // compute sig.r*G
-    ge_p3 rG_p3;
-    ge_scalarmult_base(&rG_p3, reinterpret_cast<const unsigned char*>(&sig) + 32);
+    // // compute sig.r*G
+    // ge_p3 rG_p3;
+    // ge_scalarmult_base(&rG_p3, reinterpret_cast<const unsigned char*>(&sig) + 32);
 
-    // compute sig.c*D
-    ge_p2 cD_p2;
-    ge_scalarmult(&cD_p2, reinterpret_cast<const unsigned char*>(&sig), &D_p3);
+    // // compute sig.c*D
+    // ge_p2 cD_p2;
+    // ge_scalarmult(&cD_p2, reinterpret_cast<const unsigned char*>(&sig), &D_p3);
 
-    // compute sig.r*A
-    ge_p2 rA_p2;
-    ge_scalarmult(&rA_p2, reinterpret_cast<const unsigned char*>(&sig) + 32, &A_p3);
+    // // compute sig.r*A
+    // ge_p2 rA_p2;
+    // ge_scalarmult(&rA_p2, reinterpret_cast<const unsigned char*>(&sig) + 32, &A_p3);
 
-    // compute X = sig.c*R + sig.r*G
-    PublicKey cR;
-    ge_tobytes(reinterpret_cast<unsigned char*>(&cR), &cR_p2);
-    ge_p3 cR_p3;
-    if (ge_frombytes_vartime(&cR_p3, reinterpret_cast<const unsigned char*>(&cR)) != 0) return false;
-    ge_cached rG_cached;
-    ge_p3_to_cached(&rG_cached, &rG_p3);
-    ge_p1p1 X_p1p1;
-    ge_add(&X_p1p1, &cR_p3, &rG_cached);
-    ge_p2 X_p2;
-    ge_p1p1_to_p2(&X_p2, &X_p1p1);
+    // // compute X = sig.c*R + sig.r*G
+    // PublicKey cR;
+    // ge_tobytes(reinterpret_cast<unsigned char*>(&cR), &cR_p2);
+    // ge_p3 cR_p3;
+    // if (ge_frombytes_vartime(&cR_p3, reinterpret_cast<const unsigned char*>(&cR)) != 0) return false;
+    // ge_cached rG_cached;
+    // ge_p3_to_cached(&rG_cached, &rG_p3);
+    // ge_p1p1 X_p1p1;
+    // ge_add(&X_p1p1, &cR_p3, &rG_cached);
+    // ge_p2 X_p2;
+    // ge_p1p1_to_p2(&X_p2, &X_p1p1);
 
-    // compute Y = sig.c*D + sig.r*A
-    PublicKey cD;
-    PublicKey rA;
-    ge_tobytes(reinterpret_cast<unsigned char*>(&cD), &cD_p2);
-    ge_tobytes(reinterpret_cast<unsigned char*>(&rA), &rA_p2);
-    ge_p3 cD_p3;
-    ge_p3 rA_p3;
-    if (ge_frombytes_vartime(&cD_p3, reinterpret_cast<const unsigned char*>(&cD)) != 0) return false;
-    if (ge_frombytes_vartime(&rA_p3, reinterpret_cast<const unsigned char*>(&rA)) != 0) return false;
-    ge_cached rA_cached;
-    ge_p3_to_cached(&rA_cached, &rA_p3);
-    ge_p1p1 Y_p1p1;
-    ge_add(&Y_p1p1, &cD_p3, &rA_cached);
-    ge_p2 Y_p2;
-    ge_p1p1_to_p2(&Y_p2, &Y_p1p1);
+    // // compute Y = sig.c*D + sig.r*A
+    // PublicKey cD;
+    // PublicKey rA;
+    // ge_tobytes(reinterpret_cast<unsigned char*>(&cD), &cD_p2);
+    // ge_tobytes(reinterpret_cast<unsigned char*>(&rA), &rA_p2);
+    // ge_p3 cD_p3;
+    // ge_p3 rA_p3;
+    // if (ge_frombytes_vartime(&cD_p3, reinterpret_cast<const unsigned char*>(&cD)) != 0) return false;
+    // if (ge_frombytes_vartime(&rA_p3, reinterpret_cast<const unsigned char*>(&rA)) != 0) return false;
+    // ge_cached rA_cached;
+    // ge_p3_to_cached(&rA_cached, &rA_p3);
+    // ge_p1p1 Y_p1p1;
+    // ge_add(&Y_p1p1, &cD_p3, &rA_cached);
+    // ge_p2 Y_p2;
+    // ge_p1p1_to_p2(&Y_p2, &Y_p1p1);
 
-    // compute c2 = Hs(Msg || D || X || Y)
-    s_comm_2 buf;
-    buf.msg = prefix_hash;
-    buf.D = reinterpret_cast<const EllipticCurvePoint&>(D);
-    ge_tobytes(&buf.X, &X_p2);
-    ge_tobytes(&buf.Y, &Y_p2);
-    EllipticCurveScalar c2;
-    hash_to_scalar(&buf, sizeof(s_comm_2), c2);
+    // // compute c2 = Hs(Msg || D || X || Y)
+    // s_comm_2 buf;
+    // buf.msg = prefix_hash;
+    // buf.D = reinterpret_cast<const EllipticCurvePoint&>(D);
+    // ge_tobytes(&buf.X, &X_p2);
+    // ge_tobytes(&buf.Y, &Y_p2);
+    // EllipticCurveScalar c2;
+    // hash_to_scalar(&buf, sizeof(s_comm_2), c2);
 
-    // test if c2 == sig.c
-    sc_sub(reinterpret_cast<unsigned char*>(&c2), reinterpret_cast<unsigned char*>(&c2), reinterpret_cast<const unsigned char*>(&sig));
-    return sc_isnonzero(&c2) == 0;
+    // // test if c2 == sig.c
+    // sc_sub(reinterpret_cast<unsigned char*>(&c2), reinterpret_cast<unsigned char*>(&c2), reinterpret_cast<const unsigned char*>(&sig));
+    // return sc_isnonzero(&c2) == 0;
   }
 
   static void hash_to_ec(const PublicKey &key, ge_p3 &res) {
@@ -525,23 +527,15 @@ void crypto_ops::generate_keys_from_seed(PublicKey &pub, SecretKey &sec, SecretK
 #pragma warning(disable: 4200)
 #endif
 
-  struct ec_point_pair {
-    EllipticCurvePoint a, b;
-  };
   struct rs_comm {
-  Hash h;
-  struct ec_point_pair ab[];
-};
-/*
     Hash h;
     struct {
       EllipticCurvePoint a, b;
     } ab[];
   };
 
-*/
   static inline size_t rs_comm_size(size_t pubs_count) {
-     return sizeof(rs_comm) + pubs_count * sizeof(ec_point_pair);
+    return sizeof(rs_comm) + pubs_count * sizeof(((rs_comm*)0)->ab[0]);
   }
 
   void crypto_ops::generate_ring_signature(const Hash &prefix_hash, const KeyImage &image,

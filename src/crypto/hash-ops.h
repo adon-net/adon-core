@@ -28,7 +28,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../Common/static_assert.h"
 #include "Common/int-util.h"
 
 static inline void *padd(void *p, size_t i) {
@@ -70,7 +69,7 @@ enum {
 
 void cn_fast_hash(const void *data, size_t length, char *hash);
 
-void cn_slow_hash_f(void *, const void *, size_t, void *, int, int);
+void cn_slow_hash(const void *data, size_t length, char *hash, int light, int variant, int prehashed);
 
 void hash_extra_blake(const void *data, size_t length, char *hash);
 void hash_extra_groestl(const void *data, size_t length, char *hash);

@@ -543,20 +543,20 @@ bool get_aux_block_header_hash(const Block& b, Hash& res) {
   return getObjectHash(blob, res);
 }
 
-bool get_block_longhash(cn_context &context, const Block& b, Hash& hash) {
+bool get_block_longhash(const Block& b, Hash& hash) {
   BinaryArray bd;
   if (b.majorVersion == BLOCK_MAJOR_VERSION_1 || b.majorVersion == BLOCK_MAJOR_VERSION_2) {
     if (!get_block_hashing_blob(b, bd)) {
       return false;
     }
-    cn_slow_hash_v0(context, bd.data(), bd.size(), hash);
+    cn_slow_hash_v0(bd.data(), bd.size(), hash);
   } else if (b.majorVersion == BLOCK_MAJOR_VERSION_3 || 
              b.majorVersion == BLOCK_MAJOR_VERSION_4 ||
              b.majorVersion == BLOCK_MAJOR_VERSION_5) {
     if (!getRootBlockHashingBlob(b, bd)) {
       return false;
     }
-    cn_lite_slow_hash_v1(context, bd.data(), bd.size(), hash);
+    cn_lite_slow_hash_v1(bd.data(), bd.size(), hash);
   } else {
     return false;
   }

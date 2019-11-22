@@ -157,9 +157,9 @@ public:
   difficulty_type nextDifficultyV1(uint8_t blockMajorVersion, std::vector<uint64_t> timestamps, std::vector<difficulty_type> cumulativeDifficulties) const;
   difficulty_type nextDifficultyV2(uint8_t blockMajorVersion, std::vector<uint64_t> timestamps, std::vector<difficulty_type> cumulativeDifficulties) const;
 
-  bool checkProofOfWorkV1(Crypto::cn_context& context, const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const;
-  bool checkProofOfWorkV2(Crypto::cn_context& context, const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const;
-  bool checkProofOfWork(Crypto::cn_context& context, const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const;
+  bool checkProofOfWorkV1(const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const;
+  bool checkProofOfWorkV2(const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const;
+  bool checkProofOfWork(const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const;
 
   size_t getApproximateMaximumInputCount(size_t transactionSize, size_t outputCount, size_t mixinCount) const;
 
