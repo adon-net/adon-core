@@ -691,7 +691,7 @@ bool RpcServer::on_getblocktemplate(const COMMAND_RPC_GETBLOCKTEMPLATE::request&
     throw JsonRpc::JsonRpcError{ CORE_RPC_ERROR_CODE_TOO_BIG_RESERVE_SIZE, "To big reserved size, maximum 255" };
   }
 
-  AccountPublicAddress acc = boost::value_initialized<AccountPublicAddress>();
+  AccountPublicAddress acc;
 
   if (!req.wallet_address.size() || !m_core.currency().parseAccountAddressString(req.wallet_address, acc)) {
     throw JsonRpc::JsonRpcError{ CORE_RPC_ERROR_CODE_WRONG_WALLET_ADDRESS, "Failed to parse wallet address" };
@@ -1802,7 +1802,7 @@ bool RpcServer::on_check_reserve_proof(const COMMAND_RPC_CHECK_RESERVE_PROOF::re
 }
 
 bool RpcServer::on_validate_address(const COMMAND_RPC_VALIDATE_ADDRESS::request& req, COMMAND_RPC_VALIDATE_ADDRESS::response& res) {
-    AccountPublicAddress acc = boost::value_initialized<AccountPublicAddress>();
+    AccountPublicAddress acc;
     bool                 r   = m_core.currency().parseAccountAddressString(req.address, acc);
     res.isvalid              = r;
     if (r) {
@@ -1818,7 +1818,7 @@ bool RpcServer::on_verify_message(const COMMAND_RPC_VERIFY_MESSAGE::request& req
     Crypto::Hash hash;
     Crypto::cn_fast_hash(req.message.data(), req.message.size(), hash);
 
-    AccountPublicAddress acc = boost::value_initialized<AccountPublicAddress>();
+    AccountPublicAddress acc;
     if (!m_core.currency().parseAccountAddressString(req.address, acc)) {
         throw JsonRpc::JsonRpcError(CORE_RPC_ERROR_CODE_WRONG_PARAM, std::string("Failed to parse address"));
     }

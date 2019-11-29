@@ -325,7 +325,7 @@ Blockchain::Blockchain(const Currency& currency, tx_memory_pool& tx_pool, ILogge
                                                                                                                             m_blockchainIndexesEnabled(blockchainIndexesEnabled) {
   m_outputs.set_deleted_key(0);
   m_multisignatureOutputs.set_deleted_key(0);
-  Crypto::KeyImage nullImage = boost::value_initialized<decltype(nullImage)>();
+  Crypto::KeyImage nullImage;
   m_spent_keys.set_deleted_key(nullImage);
 }
 

@@ -35,7 +35,7 @@ struct TransactionDestinationEntry {
   uint64_t amount;                    //money
   AccountPublicAddress addr;          //destination address
 
-  TransactionDestinationEntry() : amount(0), addr(boost::value_initialized<AccountPublicAddress>()) {}
+  TransactionDestinationEntry() : amount(0), addr(CryptoNote::AccountPublicAddress()) {}
   TransactionDestinationEntry(uint64_t amount, const AccountPublicAddress &addr) : amount(amount), addr(addr) {}
 };
 

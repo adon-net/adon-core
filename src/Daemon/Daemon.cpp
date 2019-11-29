@@ -341,7 +341,7 @@ int main(int argc, char* argv[])
     if (command_line::has_arg(vm, arg_set_fee_address)) {
         std::string addr_str = command_line::get_arg(vm, arg_set_fee_address);
         if (!addr_str.empty()) {
-            AccountPublicAddress acc = boost::value_initialized<AccountPublicAddress>();
+            AccountPublicAddress acc;
             if (!currency.parseAccountAddressString(addr_str, acc)) {
                 logger(ERROR, BRIGHT_RED) << "Bad fee address: " << addr_str;
                 return 1;
