@@ -8,8 +8,9 @@
 #include <functional>
 
 #include "crypto/crypto.h"
-#include "CryptoNoteCore/CryptoNoteFormatUtils.h"
+#include <crypto/random.h>
 
+#include "CryptoNoteCore/CryptoNoteFormatUtils.h"
 #include <System/InterruptedException.h>
 
 namespace CryptoNote {
@@ -64,7 +65,7 @@ void Miner::runWorkers(BlockMiningParameters blockMiningParameters, size_t threa
   m_logger(Logging::INFO) << "Starting mining for difficulty " << blockMiningParameters.difficulty;
 
   try {
-    blockMiningParameters.blockTemplate.nonce = Crypto::rand<uint32_t>();
+    blockMiningParameters.blockTemplate.nonce = Random::randomValue<uint32_t>();
 
     for (size_t i = 0; i < threadCount; ++i) {
       m_workers.emplace_back(std::unique_ptr<System::RemoteContext<void>> (

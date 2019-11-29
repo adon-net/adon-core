@@ -109,12 +109,12 @@ void wallet_rpc_server::processRequest(const CryptoNote::HttpRequest& request, C
             {"get_transaction", makeMemberMethod(&wallet_rpc_server::on_get_transaction) },
             {"get_height", makeMemberMethod(&wallet_rpc_server::on_get_height)},
             {"get_address", makeMemberMethod(&wallet_rpc_server::on_get_address)},
-            {"query_key", makeMemberMethod(&wallet_rpc_server::on_query_key)},
             {"get_tx_proof", makeMemberMethod(&wallet_rpc_server::on_get_tx_proof)},
             {"get_reserve_proof", makeMemberMethod(&wallet_rpc_server::on_get_reserve_proof)},
             {"get_tx_key", makeMemberMethod(&wallet_rpc_server::on_get_tx_key)},
-            {"get_outputs", makeMemberMethod(&wallet_rpc_server::on_get_outputs) },
-            {"reset", makeMemberMethod(&wallet_rpc_server::on_reset)}};
+            {"get_outputs", makeMemberMethod(&wallet_rpc_server::on_get_outputs)},
+            {"reset", makeMemberMethod(&wallet_rpc_server::on_reset)},
+            {"query_key", makeMemberMethod(&wallet_rpc_server::on_query_key)}};
 
         auto it = s_methods.find(jsonRequest.getMethod());
         if (it == s_methods.end()) {
@@ -545,14 +545,16 @@ bool wallet_rpc_server::on_stop_wallet(const wallet_rpc::COMMAND_RPC_STOP::reque
 
 bool wallet_rpc_server::on_gen_paymentid(const wallet_rpc::COMMAND_RPC_GEN_PAYMENT_ID::request& req, wallet_rpc::COMMAND_RPC_GEN_PAYMENT_ID::response& res)
 {
-	std::string pid;
+	std::string paymentId;
 	try {
-		pid = Common::podToHex(Crypto::rand<Crypto::Hash>());
+    Crypto::Hash pId;
+    Random::randomBytes(32, pId.data);
+		paymentId = Common::podToHex(pId);
 	}
 	catch (const std::exception& e) {
 		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR, std::string("Internal error: can't generate Payment ID: ") + e.what());
 	}
-	res.payment_id = pid;
+	res.payment_id = paymentId;
 	return true;
 }
 

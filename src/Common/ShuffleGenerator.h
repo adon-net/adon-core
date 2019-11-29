@@ -3,30 +3,35 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+
 #pragma once
 
-#include <unordered_map>
-#include <random>
+#include <crypto/random.h>
 
-template <typename T, typename Gen>
+#include <unordered_map>
+
+class SequenceEnded: public std::runtime_error {
+public:
+  SequenceEnded() : std::runtime_error("shuffle sequence ended") {
+  }
+
+  ~SequenceEnded(){}
+};
+
+template <typename T>
 class ShuffleGenerator {
 public:
 
-  ShuffleGenerator(T n, const Gen& gen = Gen()) :
-    N(n), generator(gen), count(n) {}
+  ShuffleGenerator(T n) :
+    N(n), count(n) {}
 
   T operator()() {
 
     if (count == 0) {
-      throw std::runtime_error("shuffle sequence ended");
+      throw SequenceEnded();
     }
 
-    typedef typename std::uniform_int_distribution<T> distr_t;
-    typedef typename distr_t::param_type param_t;
-
-    distr_t distr;
-    
-    T value = distr(generator, param_t(0, --count));
+    T value = Random::randomValue<T>(0, --count);
 
     auto rvalIt = selected.find(count);
     auto rval = rvalIt != selected.end() ? rvalIt->second : count;
@@ -57,5 +62,4 @@ private:
   std::unordered_map<T, T> selected;
   T count;
   const T N;
-  Gen generator;
 };

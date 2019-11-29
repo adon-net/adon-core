@@ -302,8 +302,8 @@ void WalletTransactionSender::sendTransactionRandomOutsByAmount(bool isMultisigT
   }
 }
 
-bool WalletTransactionSender::checkIfEnoughMixins(const std::vector<COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount>& outs, uint64_t mixIn) {
-  auto scanty_it = std::find_if(outs.begin(), outs.end(), [&](const COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount& out) {
+bool WalletTransactionSender::checkIfEnoughMixins(const std::vector<RandomOuts>& outs, uint64_t mixIn) {
+  auto scanty_it = std::find_if(outs.begin(), outs.end(), [&](const RandomOuts& out) {
     return out.outs.size() < mixIn;
   });
 
@@ -544,7 +544,7 @@ void WalletTransactionSender::digitSplitStrategy(TransferId firstTransferId, siz
 
 void WalletTransactionSender::prepareKeyInputs(
   const std::vector<TransactionOutputInformation>& selectedTransfers,
-  std::vector<COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount>& outs,
+  std::vector<RandomOuts>& outs,
   std::vector<TransactionSourceEntry>& sources, uint64_t mixIn) {
 
   size_t i = 0;
@@ -560,7 +560,7 @@ void WalletTransactionSender::prepareKeyInputs(
     //paste mixin transaction
     if(outs.size()) {
       std::sort(outs[i].outs.begin(), outs[i].outs.end(),
-        [](const COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::out_entry& a, const COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::out_entry& b){return a.global_amount_index < b.global_amount_index;});
+        [](const OutputEntry& a, const OutputEntry& b){return a.global_amount_index < b.global_amount_index;});
       for (auto& daemon_oe: outs[i].outs) {
         if(td.globalOutputIndex == daemon_oe.global_amount_index)
           continue;
@@ -590,7 +590,7 @@ void WalletTransactionSender::prepareKeyInputs(
 }
 
 std::vector<TransactionTypes::InputKeyInfo> WalletTransactionSender::prepareKeyInputs(const std::vector<TransactionOutputInformation>& selectedTransfers,
-                                                                                      std::vector<COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount>& outs,
+                                                                                      std::vector<RandomOuts>& outs,
                                                                                       uint64_t mixIn) {
   std::vector<TransactionSourceEntry> sources;
   prepareKeyInputs(selectedTransfers, outs, sources, mixIn);
@@ -670,7 +670,7 @@ uint64_t WalletTransactionSender::selectTransfersToSend(uint64_t neededMoney, bo
     }
   }
 
-  std::default_random_engine randomGenerator(Crypto::rand<std::default_random_engine::result_type>());
+  std::default_random_engine randomGenerator(Random::randomValue<std::default_random_engine::result_type>());
   bool selectOneDust = addDust && !unusedDust.empty();
   uint64_t foundMoney = 0;
 

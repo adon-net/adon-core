@@ -22,7 +22,7 @@
 #include "CryptoNoteProtocol/ICryptoNoteProtocolQuery.h"
 
 #include "P2p/NetNode.h"
-
+#include "crypto/random.h"
 #include "CoreRpcServerErrorCodes.h"
 #include "JsonRpc.h"
 #include "version.h"
@@ -185,8 +185,8 @@ bool RpcServer::processJsonRpcRequest(const HttpRequest& request, HttpResponse& 
         {"check_tx_key", { makeMemberMethod(&RpcServer::on_check_tx_key), false } },
         {"check_tx_proof", {makeMemberMethod(&RpcServer::on_check_tx_proof), false}},
         {"check_reserve_proof", {makeMemberMethod(&RpcServer::on_check_reserve_proof), false}},
-        {"validateaddress", {makeMemberMethod(&RpcServer::on_validate_address), false}},
-        {"verifymessage", {makeMemberMethod(&RpcServer::on_verify_message), false}}
+        {"validate_address", {makeMemberMethod(&RpcServer::on_validate_address), false}},
+        {"verify_message", {makeMemberMethod(&RpcServer::on_verify_message), false}}
   };
 
   auto it = jsonRpcHandlers.find(jsonRequest.getMethod());
@@ -368,8 +368,8 @@ bool RpcServer::on_get_random_outs(const COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOU
   res.status = CORE_RPC_STATUS_OK;
 
   std::stringstream ss;
-  typedef COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount outs_for_amount;
-  typedef COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::out_entry out_entry;
+  typedef RandomOuts outs_for_amount;
+  typedef OutputEntry out_entry;
 
   std::for_each(res.outs.begin(), res.outs.end(), [&](outs_for_amount& ofa)  {
     ss << "[" << ofa.amount << "]:";
@@ -618,7 +618,9 @@ bool RpcServer::on_get_fee_address(const COMMAND_RPC_GET_FEE_ADDRESS::request& r
 bool RpcServer::on_get_payment_id(const COMMAND_RPC_GEN_PAYMENT_ID::request& req, COMMAND_RPC_GEN_PAYMENT_ID::response& res) {
   std::string pid;
   try {
-    pid = Common::podToHex(Crypto::rand<Crypto::Hash>());
+    Crypto::Hash paymentId;
+    Random::randomBytes(32, paymentId.data);
+    pid = Common::podToHex(paymentId);
   } catch (const std::exception& e) {
     throw JsonRpc::JsonRpcError{ CORE_RPC_ERROR_CODE_INTERNAL_ERROR, "Internal error: can't generate Payment ID" };
   }
