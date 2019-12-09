@@ -230,7 +230,7 @@ struct TransferCommand {
             }
           }
         } else {
-            if (arg.length() == 187) {
+            if (arg.length() == 186) {
                 std::string paymentID;
                 std::string spendPublicKey;
                 std::string viewPublicKey;
@@ -898,7 +898,9 @@ bool simple_wallet::get_reserve_proof(const std::vector<std::string> &args){
 }
 
 std::string generatePaymentID(){
-  return Common::podToHex(Crypto::rand<Crypto::Hash>());
+  Crypto::Hash paymentId;
+  Random::randomBytes(32, paymentId.data);
+  return Common::podToHex(paymentId);
 }
 
 //----------------------------------------------------------------------------------------------------

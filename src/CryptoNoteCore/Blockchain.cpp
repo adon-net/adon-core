@@ -6,19 +6,19 @@
 #include "Blockchain.h"
 
 #include <algorithm>
-#include <numeric>
-#include <cstdio>
-#include <cmath>
 #include <boost/foreach.hpp>
+#include <cmath>
+#include <cstdio>
+#include <numeric>
 #include "Common/Math.h"
 #include "Common/int-util.h"
 // #include "Common/int-util.h"
 #include "Common/ShuffleGenerator.h"
 #include "Common/StdInputStream.h"
 #include "Common/StdOutputStream.h"
+#include "CryptoNoteTools.h"
 #include "Rpc/CoreRpcServerCommandsDefinitions.h"
 #include "Serialization/BinarySerializationTools.h"
-#include "CryptoNoteTools.h"
 #include "TransactionExtra.h"
 
 using namespace Logging;
@@ -325,7 +325,7 @@ Blockchain::Blockchain(const Currency& currency, tx_memory_pool& tx_pool, ILogge
                                                                                                                             m_blockchainIndexesEnabled(blockchainIndexesEnabled) {
   m_outputs.set_deleted_key(0);
   m_multisignatureOutputs.set_deleted_key(0);
-  Crypto::KeyImage nullImage = boost::value_initialized<decltype(nullImage)>();
+  Crypto::KeyImage nullImage;
   m_spent_keys.set_deleted_key(nullImage);
 }
 
@@ -1250,7 +1250,7 @@ bool Blockchain::handle_alternative_block(const Block& b, const Crypto::Hash& id
     difficulty_type current_diff = get_next_difficulty_for_alternative_chain(alt_chain, bei);
     if (!(current_diff)) { logger(ERROR, BRIGHT_RED) << "!!!!!!! DIFFICULTY OVERHEAD !!!!!!!"; return false; }
     Crypto::Hash proof_of_work = NULL_HASH;
-    if (!m_currency.checkProofOfWork(m_cn_context, bei.bl, current_diff, proof_of_work)) {
+    if (!m_currency.checkProofOfWork(bei.bl, current_diff, proof_of_work)) {
       logger(INFO, BRIGHT_RED) <<
         "Block with id: " << id
         << ENDL << " for alternative chain, have not enough proof of work: " << proof_of_work
@@ -1402,7 +1402,7 @@ uint32_t Blockchain::getAlternativeBlocksCount() {
   return static_cast<uint32_t>(m_alternative_chains.size());
 }
 
-bool Blockchain::add_out_to_get_random_outs(std::vector<std::pair<TransactionIndex, uint16_t>>& amount_outs, COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount& result_outs, uint64_t amount, size_t i) {
+bool Blockchain::add_out_to_get_random_outs(std::vector<std::pair<TransactionIndex, uint16_t>>& amount_outs, RandomOuts& outs, uint64_t amount, size_t i) {
   std::lock_guard<decltype(m_blockchain_lock)> lk(m_blockchain_lock);
   const Transaction& tx = transactionByIndex(amount_outs[i].first).tx;
   if (!(tx.outputs.size() > amount_outs[i].second)) {
@@ -1415,7 +1415,7 @@ bool Blockchain::add_out_to_get_random_outs(std::vector<std::pair<TransactionInd
   if (!is_tx_spendtime_unlocked(tx.unlockTime))
     return false;
 
-  COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::out_entry& oen = *result_outs.outs.insert(result_outs.outs.end(), COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::out_entry());
+  OutputEntry& oen = *outs.outs.insert(outs.outs.end(), OutputEntry());
   oen.global_amount_index = static_cast<uint32_t>(i);
   oen.out_key = boost::get<KeyOutput>(tx.outputs[amount_outs[i].second].target).key;
   return true;
@@ -1442,7 +1442,7 @@ bool Blockchain::getRandomOutsByAmount(const COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_
   std::lock_guard<decltype(m_blockchain_lock)> lk(m_blockchain_lock);
 
   for (uint64_t amount : req.amounts) {
-    COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount& result_outs = *res.outs.insert(res.outs.end(), COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount());
+    RandomOuts& result_outs = *res.outs.insert(res.outs.end(), RandomOuts());
     result_outs.amount = amount;
     auto it = m_outputs.find(amount);
     if (it == m_outputs.end()) {
@@ -1458,7 +1458,7 @@ bool Blockchain::getRandomOutsByAmount(const COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_
     if (!(up_index_limit <= amount_outs.size())) { logger(ERROR, BRIGHT_RED) << "internal error: find_end_of_allowed_index returned wrong index=" << up_index_limit << ", with amount_outs.size = " << amount_outs.size(); return false; }
 
     if (up_index_limit > 0) {
-      ShuffleGenerator<size_t, Crypto::random_engine<size_t>> generator(up_index_limit);
+      ShuffleGenerator<size_t> generator(up_index_limit);
       for (uint64_t j = 0; j < up_index_limit && result_outs.outs.size() < req.outs_count; ++j) {
         add_out_to_get_random_outs(amount_outs, result_outs, amount, generator());
       }
@@ -2038,7 +2038,7 @@ bool Blockchain::pushBlock(const Block& blockData, const std::vector<Transaction
       return false;
     }
   } else {
-    if (!m_currency.checkProofOfWork(m_cn_context, blockData, currentDifficulty, proof_of_work)) {
+    if (!m_currency.checkProofOfWork(blockData, currentDifficulty, proof_of_work)) {
       logger(INFO, BRIGHT_WHITE) <<
         "Block " << blockHash << ", has too weak proof of work: " << proof_of_work << ", expected difficulty: " << currentDifficulty;
       bvc.m_verifivation_failed = true;

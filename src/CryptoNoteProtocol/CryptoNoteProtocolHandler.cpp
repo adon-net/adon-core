@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "CryptoNoteProtocolHandler.h"
-
+#include <functional>
 #include <future>
 #include <boost/scope_exit.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -157,8 +157,9 @@ bool CryptoNoteProtocolHandler::process_payload_sync_data(const CORE_SYNC_DATA& 
     int64_t days_behind = std::abs(diff) / (24 * 60 * 60 / m_currency.difficultyTarget());
 
     logger(diff >= 0 ? (is_inital ? Logging::INFO : Logging::DEBUGGING) : Logging::TRACE, Logging::BRIGHT_YELLOW) 
-      << context << "Sync data returned unknown top block : "  << std::setw(6) << get_current_blockchain_height() << "/" << std::setw(6) << hshd.current_height 
-      << " [" <<  std::setw(6) << blocks_behind << " blocks (" << days_behind << " days) "
+      << context << "Sync data returned unknown top block : "  << std::setw(6) << get_current_blockchain_height() 
+      << "/" << std::setw(6) << hshd.current_height 
+      << " [" <<  std::setw(6) << blocks_behind << " blocks (" << std::setw(5) << days_behind << " days) "
       << (diff >= 0 ? std::string("behind") : std::string("ahead")) << "] ";
 
     logger(Logging::DEBUGGING) << "Remote top block height: " << hshd.current_height << ", id: " << hshd.top_id;

@@ -7,6 +7,7 @@
 
 #include <boost/utility/value_init.hpp>
 #include <boost/range/combine.hpp>
+#include <functional>
 
 #include "Common/StringTools.h"
 #include "CryptoNoteCore/CryptoNoteFormatUtils.h"
@@ -14,6 +15,8 @@
 #include "CryptoNoteCore/Currency.h"
 #include "CryptoNoteCore/TransactionExtra.h"
 #include "CryptoNoteConfig.h"
+
+using namespace std;
 
 namespace CryptoNote {
 
