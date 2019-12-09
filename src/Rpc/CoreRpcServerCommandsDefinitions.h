@@ -166,50 +166,51 @@ struct COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES {
     }
   };
 };
+
 //-----------------------------------------------
-struct COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_request {
-  std::vector<uint64_t> amounts;
-  uint64_t outs_count;
+#pragma pack(push, 1)
+struct OutputEntry {
+  uint32_t global_amount_index;
+  Crypto::PublicKey out_key;
 
   void serialize(ISerializer &s) {
-    KV_MEMBER(amounts)
-    KV_MEMBER(outs_count)
+    KV_MEMBER(global_amount_index)
+    KV_MEMBER(out_key);
   }
-};
-
-#pragma pack(push, 1)
-struct COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_out_entry {
-  uint64_t global_amount_index;
-  Crypto::PublicKey out_key;
 };
 #pragma pack(pop)
 
-struct COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_outs_for_amount {
+struct RandomOuts {
   uint64_t amount;
-  std::vector<COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_out_entry> outs;
+  std::vector<OutputEntry> outs;
 
   void serialize(ISerializer &s) {
     KV_MEMBER(amount)
-    serializeAsBinary(outs, "outs", s);
-  }
-};
-
-struct COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_response {
-  std::vector<COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_outs_for_amount> outs;
-  std::string status;
-
-  void serialize(ISerializer &s) {
     KV_MEMBER(outs);
-    KV_MEMBER(status)
   }
 };
 
-struct COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS {
-  typedef COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_request request;
-  typedef COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_response response;
+struct COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS
+{
+    struct request {
+      std::vector<uint64_t> amounts;
+      uint16_t outs_count;
 
-  typedef COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_out_entry out_entry;
-  typedef COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_outs_for_amount outs_for_amount;
+      void serialize(ISerializer &s) {
+        KV_MEMBER(amounts)
+        KV_MEMBER(outs_count)
+      }
+    };
+
+    struct response {
+      std::vector<RandomOuts> outs;
+      std::string status;
+
+      void serialize(ISerializer &s) {
+        KV_MEMBER(outs);
+        KV_MEMBER(status)
+      }
+    };
 };
 
 //-----------------------------------------------

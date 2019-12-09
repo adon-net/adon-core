@@ -8,6 +8,7 @@
 #include "NodeRpcProxy/NodeRpcProxy.h"
 #include <memory>
 #include <future>
+#include "Rpc/CoreRpcServerCommandsDefinitions.h"
 
 namespace PaymentService {
 
@@ -32,9 +33,7 @@ public:
 
 
   virtual void relayTransaction(const CryptoNote::Transaction& transaction, const Callback& callback) override { callback(std::error_code()); }
-  virtual void getRandomOutsByAmounts(std::vector<uint64_t>&& amounts, uint64_t outsCount,
-    std::vector<CryptoNote::COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount>& result, const Callback& callback) override {
-  }
+  virtual void getRandomOutsByAmounts(std::vector<uint64_t>&& amounts, uint64_t outsCount, std::vector<CryptoNote::RandomOuts>& result, const Callback& callback) override { }
   virtual void getNewBlocks(std::vector<Crypto::Hash>&& knownBlockIds, std::vector<CryptoNote::block_complete_entry>& newBlocks, uint32_t& startHeight, const Callback& callback) override {
     startHeight = 0;
     callback(std::error_code());

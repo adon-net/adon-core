@@ -8,7 +8,7 @@ string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_LOWER)
 
 enable_language(C)
 enable_language(CXX)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(Threads)
@@ -38,15 +38,8 @@ set(CMAKE_CONFIGURATION_TYPES Debug RelWithDebInfo Release CACHE TYPE INTERNAL)
 set(CMAKE_SKIP_INSTALL_RULES OFF)
 set(CMAKE_SKIP_PACKAGE_ALL_DEPENDENCY ON)
 set(CMAKE_SUPPRESS_REGENERATION ON)
-set(BUILD_TESTS OFF CACHE STRING "Spend time making tests? Defaults to ON")
 set(STATIC ON CACHE BOOL "Link libraries statically")
 set(PORTABLE ON CACHE STRING "Defaults to ON")
-
-if(BUILD_TESTS)
-  enable_testing()
-  # copy CTestCustom.cmake to build dir to disable long running tests in 'make test'
-  configure_file(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR})
-endif()
 
 project(Adon)
 
@@ -273,9 +266,6 @@ endif()
 
 add_subdirectory(external)
 add_subdirectory(src)
-if(BUILD_TESTS)
-  add_subdirectory(tests)
-endif()
  
 string(TIMESTAMP timestamp "%y%m%d.%H%M%S" UTC)
 
@@ -288,6 +278,5 @@ message(STATUS "Version     : ${VERSION} [${VERSION_BUILD_TYPE}.${COMMIT_ID} ${V
 message(STATUS "Boost       : ${Boost_LIB_VERSION}")
 message(STATUS "Libs Static : ${STATIC}")
 message(STATUS "Portable    : ${PORTABLE}" )
-message(STATUS "Tests       : ${BUILD_TESTS}")
 message(STATUS "Time        : ${timestamp}")
 message(STATUS "---------------------------------------------------------------------")

@@ -26,7 +26,7 @@ struct TxDustPolicy {
 
 struct SendTransactionContext {
     TransactionId transactionId;
-    std::vector<CryptoNote::COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount> outs;
+    std::vector<CryptoNote::RandomOuts> outs;
     uint64_t foundMoney;
     std::vector<TransactionOutputInformation> selectedTransfers;
     TxDustPolicy dustPolicy;

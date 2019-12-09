@@ -154,7 +154,7 @@ PublicKey getTransactionPublicKeyFromExtra(const std::vector<uint8_t>& tx_extra)
 
   TransactionExtraPublicKey pub_key_field;
   if (!findTransactionExtraFieldByType(tx_extra_fields, pub_key_field))
-    return boost::value_initialized<PublicKey>();
+    return Crypto::PublicKey();
 
   return pub_key_field.publicKey;
 }
