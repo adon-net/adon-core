@@ -40,6 +40,17 @@ set(CMAKE_SKIP_PACKAGE_ALL_DEPENDENCY ON)
 set(CMAKE_SUPPRESS_REGENERATION ON)
 set(STATIC ON CACHE BOOL "Link libraries statically")
 set(PORTABLE ON CACHE STRING "Defaults to ON")
+set(FORCE_USE_HEAP ON CACHE BOOL "Force the use of heap memory allocation")
+set(NO_AES OFF CACHE BOOL "Turn off Hardware AES instructions?")
+set(NO_OPTIMIZED_MULTIPLY_ON_ARM OFF CACHE BOOL "Turn off Optimized Multiplication on ARM?")
+
+if (FORCE_USE_HEAP)
+    add_definitions(-DFORCE_USE_HEAP)
+endif ()
+
+if (NO_AES)
+    add_definitions(-DNO_AES)
+endif ()
 
 project(Adon)
 
@@ -279,5 +290,7 @@ message(STATUS "Version         : ${VERSION} [${VERSION_BUILD_TYPE}.${COMMIT_ID}
 message(STATUS "Boost           : ${Boost_LIB_VERSION}")
 message(STATUS "Libs Static     : ${STATIC}")
 message(STATUS "Portable        : ${PORTABLE}")
+message(STATUS "FORCE_USE_HEAP  : ${FORCE_USE_HEAP}")
+message(STATUS "HW AES          : ${NO_AES}")
 message(STATUS "Buid Time       : ${timestamp}")
 message(STATUS "---------------------------------------------------------------------")
