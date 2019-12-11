@@ -19,6 +19,7 @@ public:
   virtual void setMaxLevel(Level level);
 
   void setPattern(const std::string& pattern);
+  // virtual ~CommonLogger() ;
 
 protected:
   std::set<std::string> disabledCategories;
