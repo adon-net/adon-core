@@ -11,6 +11,7 @@
 #include "Common/StringTools.h"
 #include "CryptoNoteCore/CryptoNoteFormatUtils.h"
 #include "CryptoNoteCore/CryptoNoteBasicImpl.h"
+#include "Wallet/WalletRpcServerCommandsDefinitions.h"
 #include "CryptoNoteCore/Account.h"
 #include "Rpc/JsonRpc.h"
 #include "WalletLegacy/WalletHelper.h"
@@ -114,7 +115,13 @@ void wallet_rpc_server::processRequest(const CryptoNote::HttpRequest& request, C
             {"get_tx_key", makeMemberMethod(&wallet_rpc_server::on_get_tx_key)},
             {"get_outputs", makeMemberMethod(&wallet_rpc_server::on_get_outputs)},
             {"reset", makeMemberMethod(&wallet_rpc_server::on_reset)},
-            {"query_key", makeMemberMethod(&wallet_rpc_server::on_query_key)}};
+            {"query_key", makeMemberMethod(&wallet_rpc_server::on_query_key)},
+            {"validate_address", makeMemberMethod(&wallet_rpc_server::on_validate_address)},
+            {"sign_message", makeMemberMethod(&wallet_rpc_server::on_sign_message)},
+            {"verify_message", makeMemberMethod(&wallet_rpc_server::on_verify_message)},
+            {"change_password", makeMemberMethod(&wallet_rpc_server::on_change_password)},
+            {"estimate_fusion", makeMemberMethod(&wallet_rpc_server::on_estimate_fusion)},
+            {"send_fusion", makeMemberMethod(&wallet_rpc_server::on_send_fusion)}};
 
         auto it = s_methods.find(jsonRequest.getMethod());
         if (it == s_methods.end()) {
@@ -299,17 +306,19 @@ bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANS
   uint64_t bc_height;
 	try {
 		bc_height = m_node.getKnownBlockCount();
-	}
-	catch (std::exception &e) {
-		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR, std::string("Failed to get blockchain height: ") + e.what());
+  } catch (std::exception &e) {
+    throw JsonRpc::JsonRpcError(
+        WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR,
+        std::string("Failed to get blockchain height: ") + e.what());
 	}
 
   for (size_t transactionNumber = 0; transactionNumber < transactionsCount; ++transactionNumber) {
     WalletLegacyTransaction txInfo;
     m_wallet.getTransaction(transactionNumber, txInfo);
     // if (txInfo.state != WalletLegacyTransactionState::Active || txInfo.blockHeight == WALLET_LEGACY_UNCONFIRMED_TRANSACTION_HEIGHT) {
-    if (txInfo.state == WalletLegacyTransactionState::Cancelled || txInfo.state == WalletLegacyTransactionState::Deleted 
-			|| txInfo.state == WalletLegacyTransactionState::Failed)
+    if (txInfo.state == WalletLegacyTransactionState::Cancelled || 
+        txInfo.state == WalletLegacyTransactionState::Deleted || 
+        txInfo.state == WalletLegacyTransactionState::Failed)
       continue;
     // }
 
@@ -346,9 +355,7 @@ bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANS
   return true;
 }
 
-bool wallet_rpc_server::on_get_transaction(const wallet_rpc::COMMAND_RPC_GET_TRANSACTION::request& req,
-	wallet_rpc::COMMAND_RPC_GET_TRANSACTION::response& res)
-{
+bool wallet_rpc_server::on_get_transaction(const wallet_rpc::COMMAND_RPC_GET_TRANSACTION::request& req, wallet_rpc::COMMAND_RPC_GET_TRANSACTION::response& res) {
 	res.destinations.clear();
 	uint64_t bc_height;
 	try {
@@ -559,6 +566,21 @@ bool wallet_rpc_server::on_gen_paymentid(const wallet_rpc::COMMAND_RPC_GEN_PAYME
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
+bool wallet_rpc_server::on_validate_address(const wallet_rpc::COMMAND_RPC_VALIDATE_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_VALIDATE_ADDRESS::response& res)
+{
+	CryptoNote::AccountPublicAddress acc;
+	bool r = m_currency.parseAccountAddressString(req.address, acc);
+	res.isvalid = r;
+	if (r) {
+		res.address = m_currency.accountAddressAsString(acc);
+		res.spendPublicKey = Common::podToHex(acc.spendPublicKey);
+		res.viewPublicKey = Common::podToHex(acc.viewPublicKey);
+	}
+	res.status = CORE_RPC_STATUS_OK;
+	return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
 bool wallet_rpc_server::on_get_outputs(const wallet_rpc::COMMAND_RPC_GET_OUTPUTS::request& req, wallet_rpc::COMMAND_RPC_GET_OUTPUTS::response& res) {
   std::vector<TransactionOutputInformation> outputs = m_wallet.getUnlockedOutputs();
   uint64_t total = 0;
@@ -573,6 +595,120 @@ bool wallet_rpc_server::on_get_outputs(const wallet_rpc::COMMAND_RPC_GET_OUTPUTS
   res.total = total;
 
   return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+bool wallet_rpc_server::on_sign_message(const wallet_rpc::COMMAND_RPC_SIGN_MESSAGE::request& req, wallet_rpc::COMMAND_RPC_SIGN_MESSAGE::response& res)
+{
+    res.signature = m_wallet.sign_message(req.message);
+    return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+bool wallet_rpc_server::on_verify_message(const wallet_rpc::COMMAND_RPC_VERIFY_MESSAGE::request& req, wallet_rpc::COMMAND_RPC_VERIFY_MESSAGE::response& res)
+{
+    CryptoNote::AccountPublicAddress address;
+	if (!m_currency.parseAccountAddressString(req.address, address)) {
+		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_WRONG_ADDRESS, std::string("Failed to parse address"));
+	}
+	const size_t header_len = strlen("SigV1");
+	if (req.signature.size() < header_len || req.signature.substr(0, header_len) != "SigV1") {
+		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_WRONG_SIGNATURE, std::string("Signature header check error"));
+	}
+	std::string decoded;
+	if (!Tools::Base58::decode(req.signature.substr(header_len), decoded) || sizeof(Crypto::Signature) != decoded.size()) {
+		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_WRONG_SIGNATURE, std::string("Signature decoding error"));
+		return false;
+	}
+    res.good = m_wallet.verify_message(req.message, address, req.signature);
+    return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+bool wallet_rpc_server::on_change_password(const wallet_rpc::COMMAND_RPC_CHANGE_PASSWORD::request& req, wallet_rpc::COMMAND_RPC_CHANGE_PASSWORD::response& res)
+{
+	try
+	{
+		m_wallet.changePassword(req.old_password, req.new_password);
+	}
+	catch (const std::exception& e) {
+		logger(Logging::ERROR) << "Could not change password: " << e.what();
+		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR, std::string("Could not change password: ") + e.what());
+		res.password_changed = false;
+	}
+	logger(Logging::INFO) << "Password changed via RPC.";
+	return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+bool wallet_rpc_server::on_estimate_fusion(const wallet_rpc::COMMAND_RPC_ESTIMATE_FUSION::request& req, wallet_rpc::COMMAND_RPC_ESTIMATE_FUSION::response& res)
+{
+	if (req.threshold <= m_currency.defaultDustThreshold()) {
+		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR, std::string("Fusion transaction threshold is too small. Threshold: " + 
+			m_currency.formatAmount(req.threshold)) + ", minimum threshold " + m_currency.formatAmount(m_currency.defaultDustThreshold() + 1));
+	}
+	try {
+		res.fusion_ready_count = m_wallet.estimateFusion(req.threshold);
+	}
+	catch (std::exception &e) {
+		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR, std::string("Failed to estimate fusion ready count: ") + e.what());
+	}
+	return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+bool wallet_rpc_server::on_send_fusion(const wallet_rpc::COMMAND_RPC_SEND_FUSION::request& req, wallet_rpc::COMMAND_RPC_SEND_FUSION::response& res)
+{
+	const size_t MAX_FUSION_OUTPUT_COUNT = 4;
+	
+	if (req.mixin < m_currency.minMixin() && req.mixin != 0) {
+		logger(Logging::ERROR) << "Requested mixin " << std::to_string(req.mixin) << " is too low";
+		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_WRONG_MIXIN,
+			std::string("Requested mixin " + std::to_string(req.mixin) + " is too low"));
+	}
+	
+	if (req.threshold <= m_currency.defaultDustThreshold()) {
+		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR, std::string("Fusion transaction threshold is too small. Threshold: " +
+			m_currency.formatAmount(req.threshold)) + ", minimum threshold " + m_currency.formatAmount(m_currency.defaultDustThreshold() + 1));
+	}
+
+	size_t estimatedFusionInputsCount = m_currency.getApproximateMaximumInputCount(m_currency.fusionTxMaxSize(), MAX_FUSION_OUTPUT_COUNT, req.mixin);
+	if (estimatedFusionInputsCount < m_currency.fusionTxMinInputCount()) {
+		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_WRONG_MIXIN,
+			std::string("Fusion transaction mixin is too big " + std::to_string(req.mixin)));
+	}
+
+	try {
+		std::vector<TransactionOutputInformation> fusionInputs = m_wallet.selectFusionTransfersToSend(req.threshold, m_currency.fusionTxMinInputCount(), estimatedFusionInputsCount);
+		if (fusionInputs.size() < m_currency.fusionTxMinInputCount()) {
+			//nothing to optimize
+			throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR,
+				std::string("Fusion transaction not created: nothing to optimize for threshold " + std::to_string(req.threshold)));
+		}
+
+		std::string extraString;
+		CryptoNote::WalletHelper::SendCompleteResultObserver sent;
+		WalletHelper::IWalletRemoveObserverGuard removeGuard(m_wallet, sent);
+
+		CryptoNote::TransactionId tx = m_wallet.sendFusionTransaction(fusionInputs, 0, extraString, req.mixin, req.unlock_time);
+		if (tx == WALLET_LEGACY_INVALID_TRANSACTION_ID)
+			throw std::runtime_error("Couldn't send fusion transaction");
+
+		std::error_code sendError = sent.wait(tx);
+		removeGuard.removeObserver();
+
+		if (sendError)
+			throw std::system_error(sendError);
+
+		CryptoNote::WalletLegacyTransaction txInfo;
+		m_wallet.getTransaction(tx, txInfo);
+		res.tx_hash = Common::podToHex(txInfo.hash);
+	}
+	catch (const std::exception& e)
+	{
+		throw JsonRpc::JsonRpcError(WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR, e.what());
+	}
+	return true;
 }
 
 }

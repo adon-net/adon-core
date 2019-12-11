@@ -64,6 +64,7 @@ public:
 
   virtual uint64_t actualBalance() override;
   virtual uint64_t pendingBalance() override;
+    virtual uint64_t dustBalance() override;
   virtual uint64_t actualDepositBalance() override;
   virtual uint64_t pendingDepositBalance() override;
 
@@ -102,6 +103,12 @@ public:
   virtual TransactionId deposit(uint32_t term, uint64_t amount, uint64_t fee, uint64_t mixIn = 0) override;
   virtual TransactionId withdrawDeposits(const std::vector<DepositId>& depositIds, uint64_t fee) override;
   virtual std::error_code cancelTransaction(size_t transactionId) override;
+
+  virtual TransactionId sendDustTransaction(const std::vector<WalletLegacyTransfer>& transfers, uint64_t fee, const std::string& extra = "", uint64_t mixIn = 0, uint64_t unlockTimestamp = 0) override;
+  virtual TransactionId sendFusionTransaction(const std::vector<TransactionOutputInformation>& fusionInputs, uint64_t fee, const std::string& extra = "", uint64_t mixIn = 0, uint64_t unlockTimestamp = 0) override;
+  virtual size_t estimateFusion(const uint64_t& threshold) override;
+  virtual std::vector<TransactionOutputInformation> selectFusionTransfersToSend(uint64_t threshold, size_t minInputCount, size_t maxInputCount) override;
+
 
   virtual std::string sign_message(const std::string &data) override;
   virtual bool verify_message(const std::string &data, const CryptoNote::AccountPublicAddress &address, const std::string &signature) override;

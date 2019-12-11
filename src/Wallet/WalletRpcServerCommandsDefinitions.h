@@ -4,11 +4,11 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #pragma once
-#include "CryptoNoteProtocol/CryptoNoteProtocolDefinitions.h"
 #include "CryptoNoteCore/CryptoNoteBasic.h"
-#include "crypto/hash.h"
+#include "CryptoNoteProtocol/CryptoNoteProtocolDefinitions.h"
 #include "Rpc/CoreRpcServerCommandsDefinitions.h"
 #include "WalletRpcServerErrorCodes.h"
+#include "crypto/hash.h"
 
 namespace Tools
 {
@@ -473,4 +473,92 @@ using CryptoNote::ISerializer;
     };
   };
 
-}}
+
+struct COMMAND_RPC_VALIDATE_ADDRESS {
+  struct request {
+    std::string address;
+
+    void serialize(ISerializer& s) {
+      KV_MEMBER(address)
+    }
+  };
+
+  struct response {
+    bool isvalid;
+    std::string address;
+    std::string spendPublicKey;
+    std::string viewPublicKey;
+    std::string status;
+
+    void serialize(ISerializer& s) {
+      KV_MEMBER(isvalid)
+      KV_MEMBER(address)
+      KV_MEMBER(spendPublicKey)
+      KV_MEMBER(viewPublicKey)
+      KV_MEMBER(status)
+    }
+  };
+};
+
+/* Fusion transactions */
+struct COMMAND_RPC_ESTIMATE_FUSION {
+  struct request {
+    uint64_t threshold;
+
+    void serialize(ISerializer& s) {
+      KV_MEMBER(threshold)
+    }
+  };
+
+  struct response {
+    size_t fusion_ready_count;
+
+    void serialize(ISerializer& s) {
+      KV_MEMBER(fusion_ready_count)
+    }
+  };
+};
+
+struct COMMAND_RPC_SEND_FUSION {
+  struct request {
+    uint64_t mixin = 0;
+    uint64_t threshold;
+    uint64_t unlock_time = 0;
+
+    void serialize(ISerializer& s) {
+      KV_MEMBER(mixin)
+      KV_MEMBER(threshold)
+      KV_MEMBER(unlock_time)
+    }
+  };
+  struct response {
+    std::string tx_hash;
+
+    void serialize(ISerializer& s) {
+      KV_MEMBER(tx_hash)
+    }
+  };
+};
+
+struct COMMAND_RPC_CHANGE_PASSWORD {
+  struct request {
+    std::string old_password;
+    std::string new_password;
+
+    void serialize(ISerializer& s) {
+      KV_MEMBER(old_password);
+      KV_MEMBER(new_password);
+    }
+  };
+
+  struct response {
+    bool password_changed;
+
+    void serialize(ISerializer& s) {
+      KV_MEMBER(password_changed);
+    }
+  };
+};
+
+}
+}
