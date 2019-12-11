@@ -42,6 +42,7 @@
 
 #include "version.h"
 
+#include <Config/CliHeader.h>
 #include <Logging/LoggerManager.h>
 
 #if defined(WIN32)
@@ -2997,7 +2998,7 @@ int main(int argc, char* argv[]) {
 
   logManager.configure(buildLoggerConfiguration(logLevel, Common::ReplaceExtenstion(argv[0], ".log")));
 
-  logger(INFO, BRIGHT_WHITE) << CRYPTONOTE_NAME << " wallet v" << PROJECT_VERSION_LONG;
+  std::cout << getProjectCLIHeader() << std::endl;
 
   CryptoNote::Currency currency = CryptoNote::CurrencyBuilder(logManager).
     testnet(command_line::get_arg(vm, arg_testnet)).currency();
