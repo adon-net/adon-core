@@ -24,6 +24,7 @@
 #include "P2p/NetNodeConfig.h"
 #include "Rpc/RpcServer.h"
 #include "Rpc/RpcServerConfig.h"
+#include "Config/BlockChainCheckpoints.h"
 #include "version.h"
 
 #include "Logging/ConsoleLogger.h"

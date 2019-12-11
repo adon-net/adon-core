@@ -102,10 +102,10 @@ private:
     bool get_reserve_proof(const std::vector<std::string>& args);
     bool create_integrated(const std::vector<std::string>& args = std::vector<std::string>());
     bool get_unlocked_outputs(const std::vector<std::string>& args);
-    bool deposit(const std::vector<std::string>& args);
-    bool withdraw(const std::vector<std::string>& args);
-    bool calculate_interest(const std::vector<std::string>& args);
-    bool deposit_list(const std::vector<std::string>& args);
+    // bool deposit(const std::vector<std::string>& args);
+    // bool withdraw(const std::vector<std::string>& args);
+    // bool calculate_interest(const std::vector<std::string>& args);
+    // bool deposit_list(const std::vector<std::string>& args);
     bool estimate_fusion(const std::vector<std::string>& args);
     bool optimize(const std::vector<std::string>& args);
     bool sweep_dust(const std::vector<std::string>& args);
