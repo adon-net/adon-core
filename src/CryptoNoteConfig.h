@@ -155,6 +155,9 @@ const uint64_t P2P_DEFAULT_INVOKE_TIMEOUT                    = 60 * 2 * 1000; //
 const size_t   P2P_DEFAULT_HANDSHAKE_INVOKE_TIMEOUT          = 5000;          // 5 seconds
 const char     P2P_STAT_TRUSTED_PUB_KEY[]                    = "0000000000000000000000000000000000000000000000000000000011111111";
 
+// const char LATEST_VERSION_URL[]                              = "https://latest.adon.network";
+// const std::string LICENSE_URL                                = "https://github.com/adon-net/adon-core/blob/master/LICENSE";
+
 const std::initializer_list<const char*> SEED_NODES = {
    "01.seed.adon.network:19900",
    "02.seed.adon.network:19900"
