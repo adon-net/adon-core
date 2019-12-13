@@ -20,7 +20,7 @@ const std::string _asciiArt =       "....###....########...#######..##....##..##
    the art itself, and remove these two #ifdefs and above ascii arts */
 #ifdef _WIN32
 
-const std::string asciiArt = windowsAsciiArt;
+const std::string asciiArt = _asciiArt;
 
 #else
 const std::string asciiArt = _asciiArt;
