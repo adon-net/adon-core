@@ -6,9 +6,12 @@
 #include "Ipv4Resolver.h"
 #include <cassert>
 #include <random>
+#include <stdexcept>
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
+
 #include <ws2tcpip.h>
 #include <System/Dispatcher.h>
 #include <System/ErrorMessage.h>
