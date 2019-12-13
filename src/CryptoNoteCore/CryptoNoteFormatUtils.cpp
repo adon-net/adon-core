@@ -517,7 +517,8 @@ bool get_block_hash(const Block& b, Hash& res) {
 
   if (b.majorVersion == BLOCK_MAJOR_VERSION_3 || 
       b.majorVersion == BLOCK_MAJOR_VERSION_4 ||
-      b.majorVersion == BLOCK_MAJOR_VERSION_5) {
+      b.majorVersion == BLOCK_MAJOR_VERSION_5 ||
+      b.majorVersion == BLOCK_MAJOR_VERSION_6) {
     BinaryArray rootBlob;
     auto serializer = makeRootBlockSerializer(b, true, false);
     if (!toBinaryArray(serializer, rootBlob))
@@ -558,7 +559,12 @@ bool get_block_longhash(const Block& b, Hash& hash) {
       return false;
     }
     cn_lite_slow_hash_v1(bd.data(), bd.size(), hash);
-  } else {
+  } else if (b.majorVersion == BLOCK_MAJOR_VERSION_6) {
+    if (!getRootBlockHashingBlob(b, bd)) {
+      return false;
+    }
+    chukwa_slow_hash(bd.data(), bd.size(), hash);
+  }else {
     return false;
   }
   return true;

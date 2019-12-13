@@ -19,12 +19,12 @@ const uint64_t CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX       = 0xf0ec6; // addre
 const size_t   CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW          = 10;
 
 const uint64_t CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT            = 60 * 60 * 2;
-const uint64_t CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_V1				 = 360; /* changed for LWMA3 */
+const uint64_t CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_V1         = 360; /* changed for LWMA3 */
 
 const size_t   BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW             = 60;
-const size_t   BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW_V1					 = 11; /* changed for LWMA3 */
+const size_t   BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW_V1          = 11; /* changed for LWMA3 */
 
-const uint64_t MONEY_SUPPLY				                           = UINT64_C(18446744000000000);
+const uint64_t MONEY_SUPPLY                                  = UINT64_C(18446744000000000);
 const uint64_t GENESIS_BLOCK_REWARD                          = UINT64_C(6456360400000000);
 const unsigned EMISSION_SPEED_FACTOR_V1                      = 19;
 const unsigned EMISSION_SPEED_FACTOR_V2                      = 20;
@@ -49,17 +49,17 @@ const uint64_t MAX_TX_MIXIN_SIZE                             = 12;
 const uint64_t DIFFICULTY_TARGET                             = 120; // seconds
 const uint64_t EXPECTED_NUMBER_OF_BLOCKS_PER_DAY             = 24 * 60 * 60 / DIFFICULTY_TARGET;
 const size_t   DIFFICULTY_WINDOW                             = 240; // blocks
-const size_t   DIFFICULTY_WINDOW_V1													 = DIFFICULTY_WINDOW;
-const size_t   DIFFICULTY_WINDOW_V2													 = DIFFICULTY_WINDOW;
-const size_t   DIFFICULTY_WINDOW_V3													 = 60; /* changed for LWMA3 */
-const size_t   DIFFICULTY_BLOCKS_COUNT											 = DIFFICULTY_WINDOW_V3 + 1; /* added for LWMA3 */
+const size_t   DIFFICULTY_WINDOW_V1                          = DIFFICULTY_WINDOW;
+const size_t   DIFFICULTY_WINDOW_V2									 = DIFFICULTY_WINDOW;
+const size_t   DIFFICULTY_WINDOW_V3									 = 60; /* changed for LWMA3 */
+const size_t   DIFFICULTY_BLOCKS_COUNT								 = DIFFICULTY_WINDOW_V3 + 1; /* added for LWMA3 */
 const size_t   DIFFICULTY_CUT                                = 30;  // timestamps to cut after sorting
-const size_t   DIFFICULTY_CUT_V1														 = DIFFICULTY_CUT;
-const size_t   DIFFICULTY_CUT_V2														 = DIFFICULTY_CUT;
+const size_t   DIFFICULTY_CUT_V1										 = DIFFICULTY_CUT;
+const size_t   DIFFICULTY_CUT_V2										 = DIFFICULTY_CUT;
 
 const size_t   DIFFICULTY_LAG                                = 15;
-const size_t   DIFFICULTY_LAG_V1														 = DIFFICULTY_LAG;
-const size_t   DIFFICULTY_LAG_V2														 = DIFFICULTY_LAG;
+const size_t   DIFFICULTY_LAG_V1										 = DIFFICULTY_LAG;
+const size_t   DIFFICULTY_LAG_V2										 = DIFFICULTY_LAG;
 
 static_assert(2 * DIFFICULTY_CUT <= DIFFICULTY_WINDOW - 2, "Bad DIFFICULTY_WINDOW or DIFFICULTY_CUT");
 
@@ -99,7 +99,8 @@ const uint32_t UPGRADE_HEIGHT_V2                             = 1;
 const uint32_t UPGRADE_HEIGHT_V3                             = 2;
 const uint32_t UPGRADE_HEIGHT_V4                             = 75000;
 const uint32_t UPGRADE_HEIGHT_V5                             = 100000;
-const uint32_t UPGRADE_HEIGHT_V6                             = 999999999;
+const uint32_t UPGRADE_HEIGHT_V6                             = 160000;
+const uint32_t UPGRADE_HEIGHT_V7                             = 999999999;
 
 const unsigned UPGRADE_VOTING_THRESHOLD                      = 90;               // percent
 const size_t   UPGRADE_VOTING_WINDOW                         = EXPECTED_NUMBER_OF_BLOCKS_PER_DAY;  // blocks
@@ -130,6 +131,8 @@ const uint8_t  BLOCK_MAJOR_VERSION_3                         = 3;
 const uint8_t  BLOCK_MAJOR_VERSION_4                         = 4;
 const uint8_t  BLOCK_MAJOR_VERSION_5                         = 5;
 const uint8_t  BLOCK_MAJOR_VERSION_6                         = 6;
+const uint8_t  BLOCK_MAJOR_VERSION_7                         = 7;
+
 const uint8_t  BLOCK_MINOR_VERSION_0                         = 0;
 const uint8_t  BLOCK_MINOR_VERSION_1                         = 1;
 
@@ -155,8 +158,6 @@ const uint64_t P2P_DEFAULT_INVOKE_TIMEOUT                    = 60 * 2 * 1000; //
 const size_t   P2P_DEFAULT_HANDSHAKE_INVOKE_TIMEOUT          = 5000;          // 5 seconds
 const char     P2P_STAT_TRUSTED_PUB_KEY[]                    = "0000000000000000000000000000000000000000000000000000000011111111";
 
-// const char LATEST_VERSION_URL[]                              = "https://latest.adon.network";
-// const std::string LICENSE_URL                                = "https://github.com/adon-net/adon-core/blob/master/LICENSE";
 
 const std::initializer_list<const char*> SEED_NODES = {
    "01.seed.adon.network:19900",

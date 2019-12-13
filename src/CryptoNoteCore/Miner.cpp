@@ -63,17 +63,16 @@ namespace CryptoNote
     if (m_template.majorVersion == BLOCK_MAJOR_VERSION_2 ||
         m_template.majorVersion == BLOCK_MAJOR_VERSION_3 ||
         m_template.majorVersion == BLOCK_MAJOR_VERSION_4 ||
-        m_template.majorVersion == BLOCK_MAJOR_VERSION_5) {
+        m_template.majorVersion == BLOCK_MAJOR_VERSION_5 ||
+        m_template.majorVersion == BLOCK_MAJOR_VERSION_6) {
       CryptoNote::TransactionExtraMergeMiningTag mm_tag;
       mm_tag.depth = 0;
-      if (!CryptoNote::get_aux_block_header_hash(m_template,
-                                                 mm_tag.merkleRoot)) {
+      if (!CryptoNote::get_aux_block_header_hash(m_template, mm_tag.merkleRoot)) {
         return false;
       }
 
       m_template.parentBlock.baseTransaction.extra.clear();
-      if (!CryptoNote::appendMergeMiningTagToExtra(
-              m_template.parentBlock.baseTransaction.extra, mm_tag)) {
+      if (!CryptoNote::appendMergeMiningTagToExtra(m_template.parentBlock.baseTransaction.extra, mm_tag)) {
         return false;
       }
     }
