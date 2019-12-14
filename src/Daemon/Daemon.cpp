@@ -24,6 +24,8 @@
 #include "P2p/NetNodeConfig.h"
 #include "Rpc/RpcServer.h"
 #include "Rpc/RpcServerConfig.h"
+#include <Config/CliHeader.h>
+#include "Config/BlockChainCheckpoints.h"
 #include "version.h"
 
 #include "Logging/ConsoleLogger.h"
@@ -222,7 +224,7 @@ int main(int argc, char* argv[])
     // configure logging
     logManager.configure(buildLoggerConfiguration(cfgLogLevel, cfgLogFile));
 
-    logger(INFO) << CryptoNote::CRYPTONOTE_NAME << " v" << PROJECT_VERSION_LONG;
+    std::cout << getProjectCLIHeader() << std::endl;
 
     if (command_line_preprocessor(vm, logger)) {
       return 0;

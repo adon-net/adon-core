@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <initializer_list>
+#include <boost/uuid/uuid.hpp>
 
 #pragma once
 
@@ -19,12 +20,12 @@ const uint64_t CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX       = 0xf0ec6; // addre
 const size_t   CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW          = 10;
 
 const uint64_t CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT            = 60 * 60 * 2;
-const uint64_t CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_V1				 = 360; /* changed for LWMA3 */
+const uint64_t CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_V1         = 360; /* changed for LWMA3 */
 
 const size_t   BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW             = 60;
-const size_t   BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW_V1					 = 11; /* changed for LWMA3 */
+const size_t   BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW_V1          = 11; /* changed for LWMA3 */
 
-const uint64_t MONEY_SUPPLY				                           = UINT64_C(18446744000000000);
+const uint64_t MONEY_SUPPLY                                  = UINT64_C(18446744000000000);
 const uint64_t GENESIS_BLOCK_REWARD                          = UINT64_C(6456360400000000);
 const unsigned EMISSION_SPEED_FACTOR_V1                      = 19;
 const unsigned EMISSION_SPEED_FACTOR_V2                      = 20;
@@ -49,17 +50,17 @@ const uint64_t MAX_TX_MIXIN_SIZE                             = 12;
 const uint64_t DIFFICULTY_TARGET                             = 120; // seconds
 const uint64_t EXPECTED_NUMBER_OF_BLOCKS_PER_DAY             = 24 * 60 * 60 / DIFFICULTY_TARGET;
 const size_t   DIFFICULTY_WINDOW                             = 240; // blocks
-const size_t   DIFFICULTY_WINDOW_V1													 = DIFFICULTY_WINDOW;
-const size_t   DIFFICULTY_WINDOW_V2													 = DIFFICULTY_WINDOW;
-const size_t   DIFFICULTY_WINDOW_V3													 = 60; /* changed for LWMA3 */
-const size_t   DIFFICULTY_BLOCKS_COUNT											 = DIFFICULTY_WINDOW_V3 + 1; /* added for LWMA3 */
+const size_t   DIFFICULTY_WINDOW_V1                          = DIFFICULTY_WINDOW;
+const size_t   DIFFICULTY_WINDOW_V2									 = DIFFICULTY_WINDOW;
+const size_t   DIFFICULTY_WINDOW_V3									 = 60; /* changed for LWMA3 */
+const size_t   DIFFICULTY_BLOCKS_COUNT								 = DIFFICULTY_WINDOW_V3 + 1; /* added for LWMA3 */
 const size_t   DIFFICULTY_CUT                                = 30;  // timestamps to cut after sorting
-const size_t   DIFFICULTY_CUT_V1														 = DIFFICULTY_CUT;
-const size_t   DIFFICULTY_CUT_V2														 = DIFFICULTY_CUT;
+const size_t   DIFFICULTY_CUT_V1										 = DIFFICULTY_CUT;
+const size_t   DIFFICULTY_CUT_V2										 = DIFFICULTY_CUT;
 
 const size_t   DIFFICULTY_LAG                                = 15;
-const size_t   DIFFICULTY_LAG_V1														 = DIFFICULTY_LAG;
-const size_t   DIFFICULTY_LAG_V2														 = DIFFICULTY_LAG;
+const size_t   DIFFICULTY_LAG_V1										 = DIFFICULTY_LAG;
+const size_t   DIFFICULTY_LAG_V2										 = DIFFICULTY_LAG;
 
 static_assert(2 * DIFFICULTY_CUT <= DIFFICULTY_WINDOW - 2, "Bad DIFFICULTY_WINDOW or DIFFICULTY_CUT");
 
@@ -99,7 +100,8 @@ const uint32_t UPGRADE_HEIGHT_V2                             = 1;
 const uint32_t UPGRADE_HEIGHT_V3                             = 2;
 const uint32_t UPGRADE_HEIGHT_V4                             = 75000;
 const uint32_t UPGRADE_HEIGHT_V5                             = 100000;
-const uint32_t UPGRADE_HEIGHT_V6                             = 999999999;
+const uint32_t UPGRADE_HEIGHT_V6                             = 160000;
+const uint32_t UPGRADE_HEIGHT_V7                             = 999999999;
 
 const unsigned UPGRADE_VOTING_THRESHOLD                      = 90;               // percent
 const size_t   UPGRADE_VOTING_WINDOW                         = EXPECTED_NUMBER_OF_BLOCKS_PER_DAY;  // blocks
@@ -130,6 +132,8 @@ const uint8_t  BLOCK_MAJOR_VERSION_3                         = 3;
 const uint8_t  BLOCK_MAJOR_VERSION_4                         = 4;
 const uint8_t  BLOCK_MAJOR_VERSION_5                         = 5;
 const uint8_t  BLOCK_MAJOR_VERSION_6                         = 6;
+const uint8_t  BLOCK_MAJOR_VERSION_7                         = 7;
+
 const uint8_t  BLOCK_MINOR_VERSION_0                         = 0;
 const uint8_t  BLOCK_MINOR_VERSION_1                         = 1;
 
@@ -155,44 +159,11 @@ const uint64_t P2P_DEFAULT_INVOKE_TIMEOUT                    = 60 * 2 * 1000; //
 const size_t   P2P_DEFAULT_HANDSHAKE_INVOKE_TIMEOUT          = 5000;          // 5 seconds
 const char     P2P_STAT_TRUSTED_PUB_KEY[]                    = "0000000000000000000000000000000000000000000000000000000011111111";
 
+const static boost::uuids::uuid CRYPTONOTE_NETWORK = { { 0x77, 0x6c, 0x66, 0x2e, 0x61, 0x64, 0x6f, 0x6e, 0x2e, 0x6e, 0x65, 0x74, 0x77, 0x6f, 0x72, 0x6b } };
+
 const std::initializer_list<const char*> SEED_NODES = {
    "01.seed.adon.network:19900",
    "02.seed.adon.network:19900"
-};
-
-struct CheckpointData {
-  uint32_t height;
-  const char* blockId;
-};
-
-#ifdef __GNUC__
-__attribute__((unused))
-#endif
-
-// You may add here other checkpoints using the following format:
-// {<block height>, "<block hash>"},
-const std::initializer_list<CheckpointData> CHECKPOINTS = {
-  {   5000, "f6ecfb7fd0527cf7baf51e6626cc921fa6db73403d9e33f2e8c78465926c3d0b" },
-  {  10000, "fe3cee2b2853395a19c3d4c9f15e5e354460f8e6e868313c9539016985498780" },
-  {  20000, "5c2bc247683f369d6aca1ddb1407e0d38f3cfda22d712f66acaac246514fa88e" },
-  {  30000, "2bbdf4349ae1a94d3178b4fa36f1fa8bb35caa518300a8f0be3a52ed4f057f22" },
-  {  40000, "8b70c42d72e9e4d36737d4c7d12fa3151db15426b6b20fc0c7aa112b2f53a095" },
-  {  50000, "42c5bc70a7aeeade1ec9853ab55c34a26e16bbe49c5fa3fa366c8a3a1258f6d7" },
-  {  60000, "9055e1a362c9711761cbcceb8c5d6fc993f896a9ec9e254807824462320dd782" },
-  {  65000, "1eaade74fee6f70821dee24260ef0deb67a0d9ba1dd58de4c8c6d09621894371" },
-  {  70000, "2f98f5b14df2d6c8c72fcc86ddcbaeee56c02475c0037ac1feca727e40f39d58" },
-  {  75000, "89072402a6df5bcbcb371aa134d2398c8cf39383b7cb52fb070896bfe8e4032b" },
-  {  80000, "0ce43923733968f955fc5f711e7832bb01602ad3265bf0bb0e57ce286df52147" },
-  {  85000, "3f4afe4f61881e0964d27a90da13184c3b468c552be101b03d3c8affdb0a27d7" },
-  {  90000, "2ca13ebc203a45e55e03bf3219902a17dfadbbfa404825a21409034d273481ad" },
-  {  95000, "9cc046be2697115366370eaa4c3b225bc2e62a18ed2f2d250da12ec0ee6de00d" },
-  { 100000, "5bd8e3329aa0dbae36163cfb42f5b99fb82aaed5b90fb64138b714bed94c767f" },
-  { 105000, "28f303d23d0068d86fc4a56e13fb9c7aac4d8a656ede189044f8fc2984556421" },
-  { 110000, "d303269c5138e604b4cdbfae801c78d341c47801c964376688cf2c2c1def2115" },
-  { 115000, "4b4bbe730f1918adb703796f4956dd94d61d779a4323200d6cffd3c7f7ffcc42" },
-  { 120000, "223fbc9587668fc446156f29d1e8d2bc3edf77425017c1ae1c0da8d06e874da7" },
-  { 125000, "6b33303f16920ac2f0509c75fea2554faf7be684a2c0e957fe8be12a720fc2d0" },
-  { 130000, "d2b92bdbde612414689c9628afcb4d80af42f39cb86738ea01e9818d1df13566" }
 };
 
 } // CryptoNote

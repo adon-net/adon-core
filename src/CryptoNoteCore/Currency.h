@@ -162,6 +162,7 @@ public:
   bool checkProofOfWork(const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const;
 
   size_t getApproximateMaximumInputCount(size_t transactionSize, size_t outputCount, size_t mixinCount) const;
+  static const std::vector<uint64_t> PRETTY_AMOUNTS;
 
 private:
   Currency(Logging::ILogger& log) : logger(log, "currency") {
@@ -230,6 +231,8 @@ private:
   uint32_t m_upgradeHeightV3;
   uint32_t m_upgradeHeightV4;
   uint32_t m_upgradeHeightV5;
+  uint32_t m_upgradeHeightV6;
+
   unsigned int m_upgradeVotingThreshold;
   uint32_t m_upgradeVotingWindow;
   uint32_t m_upgradeWindow;
@@ -243,8 +246,6 @@ private:
   std::string m_blockIndexesFileName;
   std::string m_txPoolFileName;
   std::string m_blockchinIndicesFileName;
-
-  static const std::vector<uint64_t> PRETTY_AMOUNTS;
 
   bool m_testnet;
 
@@ -325,6 +326,7 @@ public:
   CurrencyBuilder& upgradeHeightV3(uint32_t val) { m_currency.m_upgradeHeightV3 = val; return *this; }
   CurrencyBuilder& upgradeHeightV4(uint32_t val) { m_currency.m_upgradeHeightV4 = val; return *this; }
   CurrencyBuilder& upgradeHeightV5(uint32_t val) { m_currency.m_upgradeHeightV5 = val; return *this; }
+  CurrencyBuilder& upgradeHeightV6(uint32_t val) { m_currency.m_upgradeHeightV6 = val; return *this; }
 
   CurrencyBuilder& upgradeVotingThreshold(unsigned int val);
   CurrencyBuilder& upgradeVotingWindow(uint32_t val) { m_currency.m_upgradeVotingWindow = val; return *this; }

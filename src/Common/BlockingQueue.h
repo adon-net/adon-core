@@ -11,14 +11,12 @@
 #include <mutex>
 #include <thread>
 
-template < typename T, typename Container = std::deque<T> >
-class BlockingQueue {
+template <typename T, typename Container = std::deque<T>> class BlockingQueue {
 public:
 
   typedef BlockingQueue<T, Container> ThisType;
 
-  BlockingQueue(size_t maxSize = 1) : 
-    m_maxSize(maxSize), m_closed(false) {}
+  BlockingQueue(size_t maxSize = 1) : m_maxSize(maxSize), m_closed(false) {}
 
   template <typename TT>
   bool push(TT&& v) {
@@ -63,7 +61,7 @@ public:
   void close(bool wait = false) {
     std::unique_lock<std::mutex> lk(m_mutex);
     m_closed = true;
-    m_haveData.notify_all(); // wake up threads in pop()
+    m_haveData.notify_all();  // wake up threads in pop()
     m_haveSpace.notify_all();
 
     if (wait) {
@@ -93,12 +91,10 @@ private:
   std::condition_variable m_haveSpace;
 };
 
-template <typename QueueT>
-class GroupClose {
+template <typename QueueT> class GroupClose {
 public:
-
-  GroupClose(QueueT& queue, size_t groupSize)
-    : m_queue(queue), m_count(groupSize) {}
+  GroupClose(QueueT &queue, size_t groupSize)
+      : m_queue(queue), m_count(groupSize) {}
 
   void close() {
     if (m_count == 0)
@@ -108,8 +104,6 @@ public:
   }
 
 private:
-
   std::atomic<size_t> m_count;
-  QueueT& m_queue;
-
+  QueueT &m_queue;
 };
