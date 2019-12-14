@@ -138,13 +138,17 @@ uint64_t Currency::upgradeHeight(uint8_t majorVersion) const {
     return m_upgradeHeightV4;
   } else if (majorVersion == BLOCK_MAJOR_VERSION_5) {
     return m_upgradeHeightV5;
-  } else {
+  } else if (majorVersion == BLOCK_MAJOR_VERSION_6) {
+    return m_upgradeHeightV6;
+  }else {
     return static_cast<uint32_t>(-1);
   }
 }
 
 uint8_t getBlockMajorVersionForHeight(uint32_t height) {
-  if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V5) {
+  if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V6) {
+    return BLOCK_MAJOR_VERSION_6;
+  } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V5) {
     return BLOCK_MAJOR_VERSION_5;
   } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V4) {
     return BLOCK_MAJOR_VERSION_4;
@@ -711,6 +715,8 @@ bool Currency::checkProofOfWork(const Block& block, difficulty_type currentDiffi
   case BLOCK_MAJOR_VERSION_3:
   case BLOCK_MAJOR_VERSION_4:
   case BLOCK_MAJOR_VERSION_5:
+  case BLOCK_MAJOR_VERSION_6:
+
     return checkProofOfWorkV2(block, currentDiffic, proofOfWork);
   }
 
@@ -799,6 +805,7 @@ CurrencyBuilder::CurrencyBuilder(Logging::ILogger& log) : m_currency(log) {
   upgradeHeightV3(parameters::UPGRADE_HEIGHT_V3);
   upgradeHeightV4(parameters::UPGRADE_HEIGHT_V4);
   upgradeHeightV5(parameters::UPGRADE_HEIGHT_V5);
+  upgradeHeightV6(parameters::UPGRADE_HEIGHT_V6);
 
   upgradeVotingThreshold(parameters::UPGRADE_VOTING_THRESHOLD);
   upgradeVotingWindow(parameters::UPGRADE_VOTING_WINDOW);

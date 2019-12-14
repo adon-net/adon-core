@@ -7,33 +7,35 @@
 
 #pragma once
 
-#include <stddef.h>
+#include "argon2.h"
 
 #include <CryptoTypes.h>
+#include <stddef.h>
+#include <cstring>
 
 // Standard Cryptonight Definitions
-#define CN_PAGE_SIZE 2097152
+#define CN_PAGE_SIZE  2097152
 #define CN_SCRATCHPAD 2097152
 #define CN_ITERATIONS 1048576
 
 // Standard CryptoNight Lite Definitions
-#define CN_LITE_PAGE_SIZE 2097152
+#define CN_LITE_PAGE_SIZE  2097152
 #define CN_LITE_SCRATCHPAD 1048576
 #define CN_LITE_ITERATIONS 524288
 
 // Standard CryptoNight Dark
-#define CN_DARK_PAGE_SIZE 524288
+#define CN_DARK_PAGE_SIZE  524288
 #define CN_DARK_SCRATCHPAD 524288
 #define CN_DARK_ITERATIONS 262144
 
 // Standard CryptoNight Turtle
-#define CN_TURTLE_PAGE_SIZE 262144
+#define CN_TURTLE_PAGE_SIZE  262144
 #define CN_TURTLE_SCRATCHPAD 262144
 #define CN_TURTLE_ITERATIONS 131072
 
 // CryptoNight Soft Shell Definitions
-#define CN_SOFT_SHELL_MEMORY 262144  /* This defines the lowest memory utilization for our curve */
-#define CN_SOFT_SHELL_WINDOW 2048    /* This defines how many blocks we cycle through as part of our algo sine wave */
+#define CN_SOFT_SHELL_MEMORY     262144  /* This defines the lowest memory utilization for our curve */
+#define CN_SOFT_SHELL_WINDOW     2048    /* This defines how many blocks we cycle through as part of our algo sine wave */
 #define CN_SOFT_SHELL_MULTIPLIER 3   /* This defines how big our steps are for each block and 
                                       ultimately determines how big our sine wave is. A smaller value means a bigger wave */
 #define CN_SOFT_SHELL_ITER (CN_SOFT_SHELL_MEMORY / 2)
@@ -44,11 +46,20 @@
 #error The CryptoNight Soft Shell Parameters you supplied will exceed normal paging operations.
 #endif
 
+// Chukwa Definitions
+#define CHUKWA_HASHLEN 32 // The length of the resulting hash in bytes
+#define CHUKWA_SALTLEN 16 // The length of our salt in bytes
+#define CHUKWA_THREADS 1 // How many threads to use at once
+#define CHUKWA_ITERS   3 // How many iterations we perform as part of our slow-hash
+#define CHUKWA_MEMORY  512 // This value is in KiB (0.5MB)
+
 namespace Crypto {
 
 extern "C" {
 #include "hash-ops.h"
 }
+
+static bool argon2_optimization_selected = false;
 
 /*
     Cryptonight hash functions
@@ -186,6 +197,24 @@ inline void cn_soft_shell_slow_hash_v2(const void *data, size_t length, Hash &ha
   uint32_t pagesize   = scratchpad;
 
   cn_slow_hash(data, length, reinterpret_cast<char *>(&hash), 1, 2, 0, pagesize, scratchpad, iterations);
+}
+
+inline void chukwa_slow_hash(const void *data, size_t length, Hash &hash) {
+  uint8_t salt[CHUKWA_SALTLEN];
+  memcpy(salt, data, sizeof(salt));
+
+  /* If this is the first time we've called this hash function then
+      we need to have the Argon2 library check to see if any of the
+      available CPU instruction sets are going to help us out */
+  if (!argon2_optimization_selected) {
+    /* Call the library quick benchmark test to set which CPU
+        instruction sets will be used */
+    argon2_select_impl(NULL, NULL);
+    argon2_optimization_selected = true;
+  }
+
+  argon2id_hash_raw(CHUKWA_ITERS, CHUKWA_MEMORY, CHUKWA_THREADS, data, length,
+                    salt, CHUKWA_SALTLEN, hash.data, CHUKWA_HASHLEN);
 }
 
 inline void tree_hash(const Hash *hashes, size_t count, Hash &root_hash) {
