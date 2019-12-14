@@ -88,6 +88,7 @@ endif ()
 
 target_link_libraries(Common)
 target_link_libraries(Crypto argon2)
+target_link_libraries(CryptoNoteCore argon2)
 target_link_libraries(CryptoTest Crypto Common  ${Boost_LIBRARIES})
 target_link_libraries(Daemon Rpc Config CryptoNoteCore P2P System Http Logging Common Crypto upnpc-static BlockchainExplorer ${Boost_LIBRARIES} Serialization ${EXTRA_LIBRARIES})
 target_link_libraries(SimpleWallet Wallet NodeRpcProxy Transfers Rpc Http CryptoNoteCore System Logging Common Crypto ${Boost_LIBRARIES} Serialization Mnemonics ${EXTRA_LIBRARIES})
