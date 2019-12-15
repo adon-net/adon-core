@@ -1,0 +1,75 @@
+sudo: false
+language: cpp
+cache:
+ ccache: true
+ directories:
+    - /home/travis/toolchain
+
+matrix:
+  include:
+
+  # Ubuntu, g++-8
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+          - libboost-all-dev
+          - g++-8
+          - gcc-8
+    env:
+    - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+    - LABEL="linux"
+    - _DEPLOYABLE="true"
+    - STRIP="strip"
+
+  # Ubuntu, g++-7
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+          - libboost-all-dev
+          - g++-7
+          - gcc-7
+    env:
+    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - LABEL="linux-g++-7"
+    - STRIP="strip"
+
+  # Ubuntu, clang-6
+  - os: linux
+    dist: xenial
+    compiler: clang
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - llvm-toolchain-trusty-6.0
+        packages:
+          - libboost-all-dev
+          - clang-6.0
+          - libstdc++-7-dev
+    env:
+    - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
+    - LABEL="linux-clang-6"
+    - STRIP="strip"
+
+  - os: osx
+    osx_image: xcode11.2
+    env:
+      - MATRIX_EVAL="brew install gcc boost && CC=gcc-7 && CXX=g++-7
+
+before_install:
+  - eval "${MATRIX_EVAL}"    
+
+script:
+  - eval "${MATRIX_EVAL}"
+  - cmake -DSTATIC=true -S . -Bbuild 
+  - make -j2 -Cbuild

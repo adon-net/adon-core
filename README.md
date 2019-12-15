@@ -1,3 +1,10 @@
+
+#### Build Status - Master Branch
+[![Build Status](https://travis-ci.org/adon-net/adon-core.svg?branch=master)](https://travis-ci.org/adon-net/adon-core)
+
+#### Build Status - Develop Branch
+[![Build Status](https://travis-ci.org/adon-net/adon-core.svg?branch=develop)](https://travis-ci.org/adon-net/adon-core)
+
 ## Building Adon Coin
 
 ### On *nix:
