@@ -51,14 +51,14 @@ matrix:
       apt:
         sources:
         - ubuntu-toolchain-r-test
-        - llvm-toolchain-trusty-6.0
+        - llvm-toolchain-xenial-8
         packages:
           - libboost-all-dev
-          - clang-6.0
-          - libstdc++-7-dev
+          - clang-8.0
+          - libstdc++-6-dev
     env:
-    - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
-    - LABEL="linux-clang-6"
+    - MATRIX_EVAL="CC=clang-8.0 && CXX=clang++-8.0"
+    - LABEL="linux-clang-8"
     - STRIP="strip"
 
   - os: osx
