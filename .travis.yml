@@ -42,25 +42,8 @@ matrix:
     - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     - LABEL="linux-g++-7"
     - STRIP="strip"
-
-  # Ubuntu, clang-6
-  - os: linux
-    dist: xenial
-    compiler: clang
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        - llvm-toolchain-xenial-8
-        packages:
-          - libboost-all-dev
-          - clang-8.0
-          - libstdc++-6-dev
-    env:
-    - MATRIX_EVAL="CC=clang-8.0 && CXX=clang++-8.0"
-    - LABEL="linux-clang-8"
-    - STRIP="strip"
-
+  
+  # OSX 
   - os: osx
     osx_image: xcode11.2
     env:
