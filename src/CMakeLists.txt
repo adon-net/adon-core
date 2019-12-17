@@ -76,7 +76,7 @@ add_executable(CryptoTest         ${CryptoTest}        )
 
 target_link_libraries(Common)
 target_link_libraries(Crypto argon2)
-target_link_libraries(CryptoNoteCore Common Logging Crypto P2P Rpc Http Serialization System ${Boost_LIBRARIES})
+target_link_libraries(CryptoNoteCore Common Logging Crypto P2P Rpc Http Serialization System BlockchainExplorer ${Boost_LIBRARIES})
 target_link_libraries(Logging Common)
 target_link_libraries(NodeRpcProxy Rpc)
 target_link_libraries(P2P upnpc-static Serialization)
@@ -88,7 +88,7 @@ target_link_libraries(Daemon Rpc Config CryptoNoteCore CryptoNoteProtocol Loggin
 target_link_libraries(SimpleWallet Common CryptoNoteCore Wallet NodeRpcProxy Transfers  Serialization Mnemonics ${Boost_LIBRARIES})
 target_link_libraries(PaymentGateService PaymentGate Wallet WalletLegacy NodeRpcProxy P2P Serialization InProcessNode JsonRpcServer NodeRpcProxy BlockchainExplorer ${Boost_LIBRARIES})
 target_link_libraries(Miner Crypto Common CryptoNoteCore ${Boost_LIBRARIES})
-target_link_libraries(ConnectivityTool Crypto Common CryptoNoteCore ${Boost_LIBRARIES})
+target_link_libraries(ConnectivityTool Crypto Common CryptoNoteCore BlockchainExplorer ${Boost_LIBRARIES})
 target_link_libraries(CryptoTest Crypto Common ${Boost_LIBRARIES})
 
 if (MSVC)
