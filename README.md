@@ -1,9 +1,10 @@
 
-#### Build Status - Master Branch
-[![Build Status](https://travis-ci.org/adon-net/adon-core.svg?branch=master)](https://travis-ci.org/adon-net/adon-core)
+#### Branch  : Master
+[![Build Status](https://travis-ci.org/adon-net/adon-core.svg?branch=master)](https://travis-ci.org/adon-net/adon-core)[![Build status](https://ci.appveyor.com/api/projects/status/3n24e2ram3wigsr4/branch/master?svg=true)](https://ci.appveyor.com/project/adon-net/adon-core/branch/master)
 
-#### Build Status - Develop Branch
-[![Build Status](https://travis-ci.org/adon-net/adon-core.svg?branch=develop)](https://travis-ci.org/adon-net/adon-core)
+#### Branch  : Develop 
+[![Build Status](https://travis-ci.org/adon-net/adon-core.svg?branch=develop)](https://travis-ci.org/adon-net/adon-core)[![Build status](https://ci.appveyor.com/api/projects/status/3n24e2ram3wigsr4/branch/develop?svg=true)](https://ci.appveyor.com/project/adon-net/adon-core/branch/develo)
+
 
 ## Building Adon Coin
 
