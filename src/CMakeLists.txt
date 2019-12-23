@@ -76,7 +76,7 @@ add_executable(CryptoTest         ${CryptoTest}        )
 
 target_link_libraries(Common)
 target_link_libraries(Crypto argon2)
-target_link_libraries(CryptoNoteCore Common Logging Crypto P2P Rpc Http Serialization System ${Boost_LIBRARIES})
+target_link_libraries(CryptoNoteCore Common Logging Crypto P2P Rpc Http Serialization System BlockchainExplorer ${Boost_LIBRARIES})
 target_link_libraries(Logging Common)
 target_link_libraries(NodeRpcProxy Rpc)
 target_link_libraries(P2P upnpc-static Serialization)
