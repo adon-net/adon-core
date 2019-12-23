@@ -145,21 +145,21 @@ uint64_t Currency::upgradeHeight(uint8_t majorVersion) const {
   }
 }
 
-uint8_t getBlockMajorVersionForHeight(uint32_t height) {
-  if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V6) {
-    return BLOCK_MAJOR_VERSION_6;
-  } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V5) {
-    return BLOCK_MAJOR_VERSION_5;
-  } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V4) {
-    return BLOCK_MAJOR_VERSION_4;
-  } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V3) {
-    return BLOCK_MAJOR_VERSION_3;
-  } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V2) {
-    return BLOCK_MAJOR_VERSION_2;
-  } else {
-    return BLOCK_MAJOR_VERSION_1;
-  }
-}
+// uint8_t getBlockMajorVersionForHeight(uint32_t height) {
+//   if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V6) {
+//     return BLOCK_MAJOR_VERSION_6;
+//   } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V5) {
+//     return BLOCK_MAJOR_VERSION_5;
+//   } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V4) {
+//     return BLOCK_MAJOR_VERSION_4;
+//   } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V3) {
+//     return BLOCK_MAJOR_VERSION_3;
+//   } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V2) {
+//     return BLOCK_MAJOR_VERSION_2;
+//   } else {
+//     return BLOCK_MAJOR_VERSION_1;
+//   }
+// }
 
 bool Currency::getBlockReward(uint8_t blockMajorVersion, size_t medianSize, size_t currentBlockSize, uint64_t alreadyGeneratedCoins,
   uint64_t fee, uint64_t& reward, int64_t& emissionChange) const {
