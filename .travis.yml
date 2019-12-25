@@ -8,6 +8,24 @@ cache:
 matrix:
   include:
 
+  # Ubuntu, g++-9
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+          - libboost-all-dev
+          - g++-9
+          - gcc-9
+    env:
+    - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+    - LABEL="linux"
+    - _DEPLOYABLE="true"
+    - STRIP="strip"
+
   # Ubuntu, g++-8
   - os: linux
     dist: xenial
