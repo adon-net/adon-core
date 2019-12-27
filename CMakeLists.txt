@@ -21,32 +21,8 @@ project(Adon)
 
 enable_language(C)
 enable_language(CXX)
-
-# Assert our compiler is good
-# if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-#     # GCC 7.0 or higher
-#     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7)
-#         message(FATAL_ERROR "GCC/G++ 7.0 or greater is required to compile. Please check the README.md for detailed compilation instructions.")
-#     endif ()
-# elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-#     # Clang 6.0 or higher
-#     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6)
-#         message(FATAL_ERROR "Clang 6.0 or greater is required to compile. Please check the README.md for detailed compilation instructions.")
-#     endif ()
-# elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-#     # Visual Studio 15 2017 or higher
-#     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.10)
-#         message(FATAL_ERROR "MSVC 19.10 or greater is required to compile (Latest Visual Studio 15 2017 should suffice). Please check the README.md for detailed compilation instructions.")
-#     endif ()
-# else ()
-#     message(WARNING "You are using an unsupported compiler. The compilation is very likely to fail. God speed.")
-# endif ()
-
 find_package(Threads)
 
-set(VERSION_MAJOR "2")
-set(VERSION_MINOR "0")
-set(VERSION_PATCH "0")
 set(VERSION_IS_DIRTY "")
 string(TIMESTAMP timestamp "%y%m%d.%H%M%S" UTC)
 set(VERSION_BUILD_TIME "${timestamp}")
@@ -177,6 +153,10 @@ else()
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 ${STATICASSERTC_FLAG} ${WARNINGS} ${C_WARNINGS} ${ARCH_FLAG} ${MAES_FLAG}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 ${STATICASSERTCPP_FLAG} ${WARNINGS} ${CXX_WARNINGS} ${ARCH_FLAG} ${MAES_FLAG}")
+  
+  if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "arm" OR "${BUILD_ARCH}" STREQUAL "arm")
+    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -latomic")
+  endif()
 
   if (APPLE)
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
@@ -256,8 +236,6 @@ set(COMMIT_ID_IN_VERSION ON CACHE BOOL "Include commit ID in version")
 if (NOT COMMIT_ID_IN_VERSION)
   set(VERSION "${VERSION}-unknown")
   set(COMMIT_ID "unknown")
-  # message(STATUS "Version : ${VERSION}")
-  # message(STATUS "Revision : ${COMMIT_ID}")
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/Config/version.h.in" "${CMAKE_CURRENT_BINARY_DIR}/version/version.h")
   add_custom_target(version ALL)
 elseif(DEFINED COMMIT_ID_IN_VERSION)
@@ -311,6 +289,7 @@ message(STATUS "------------------------- ADON BUILD DETAILS -------------------
 message(STATUS "Version         : ${VERSION_SHORT}")
 message(STATUS "Build           : ${VERSION_BUILD_TYPE}")
 message(STATUS "Arch            : ${ARCH}")
+message(STATUS "Processor       : ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "Addressing Mode : ${ARCH_WIDTH}")
 message(STATUS "BUILD_ARCH      : ${BUILD_ARCH}")
 message(STATUS "Compiler        : ${CMAKE_C_COMPILER_ID} version ${CMAKE_CXX_COMPILER_VERSION}")
