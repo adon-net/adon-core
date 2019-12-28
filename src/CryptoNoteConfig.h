@@ -100,7 +100,7 @@ const uint32_t UPGRADE_HEIGHT_V2                             = 1;
 const uint32_t UPGRADE_HEIGHT_V3                             = 2;
 const uint32_t UPGRADE_HEIGHT_V4                             = 75000;
 const uint32_t UPGRADE_HEIGHT_V5                             = 100000;
-const uint32_t UPGRADE_HEIGHT_V6                             = 160000;
+const uint32_t UPGRADE_HEIGHT_V6                             = 165000;
 const uint32_t UPGRADE_HEIGHT_V7                             = 999999999;
 
 const unsigned UPGRADE_VOTING_THRESHOLD                      = 90;               // percent
