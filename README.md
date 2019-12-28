@@ -1,10 +1,27 @@
 
-#### Branch  : Master
-[![Build Status](https://travis-ci.org/adon-net/adon-core.svg?branch=master)](https://travis-ci.org/adon-net/adon-core)[![Build status](https://ci.appveyor.com/api/projects/status/3n24e2ram3wigsr4/branch/master?svg=true)](https://ci.appveyor.com/project/adon-net/adon-core/branch/master)
+#### BRANCH  : MASTER
+[![nix 64-bit](https://img.shields.io/travis/adon-net/adon-core/master.svg?label=nix.x64&logo=travis&style=for-the-badge)](https://travis-ci.org/adon-net/adon-core) 
+[![win 64-bit](https://img.shields.io/appveyor/ci/adon-net/adon-core/master?label=win.x64&logo=appveyor&style=for-the-badge)](https://ci.appveyor.com/project/adon-net/adon-core/branch/master)
 
-#### Branch  : Develop 
-[![Build Status](https://travis-ci.org/adon-net/adon-core.svg?branch=develop)](https://travis-ci.org/adon-net/adon-core)[![Build status](https://ci.appveyor.com/api/projects/status/3n24e2ram3wigsr4/branch/develop?svg=true)](https://ci.appveyor.com/project/adon-net/adon-core/branch/develo)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/adon-net/adon-core/master?logo=git&style=for-the-badge)
+![GitHub commits since latest release (branch)](https://img.shields.io/github/commits-since/adon-net/adon-core/v1.1.0/master?logo=git&style=for-the-badge)
 
+#### BRANCH  : DEVELOP 
+[![nix 64-bit](https://img.shields.io/travis/adon-net/adon-core/develop?label=nix.x64&logo=travis&style=for-the-badge)](https://travis-ci.org/adon-net/adon-core) 
+[![win 64-bit](https://img.shields.io/appveyor/ci/adon-net/adon-core/develop?label=win.x64&logo=appveyor&style=for-the-badge)](https://ci.appveyor.com/project/adon-net/adon-core/branch/develop)  
+
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/adon-net/adon-core/develop?logo=git&style=for-the-badge)
+![GitHub commits since latest release (branch)](https://img.shields.io/github/commits-since/adon-net/adon-core/v1.1.0/develop?logo=git&style=for-the-badge)
+
+#### RELEASE
+![GitHub Release Date](https://img.shields.io/github/release-date/adon-net/adon-core?logo=git&style=for-the-badge)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/adon-net/adon-core?logo=git&style=for-the-badge)
+![GitHub All Releases](https://img.shields.io/github/downloads/adon-net/adon-core/total?logo=git&style=for-the-badge)
+
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/adon-net/adon-core?logo=git&style=for-the-badge) 
+![GitHub repo size](https://img.shields.io/github/repo-size/adon-net/adon-core?logo=git&style=for-the-badge) 
+
+![GitHub language count](https://img.shields.io/github/languages/count/adon-net/adon-core?logo=git&style=for-the-badge)
 
 ## Building Adon Coin
 

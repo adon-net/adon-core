@@ -1,14 +1,14 @@
 sudo: false
 language: cpp
+
 cache:
- ccache: true
- directories:
-    - /home/travis/toolchain
+  ccache: true
+  directories:
+  - "/home/travis/toolchain"
 
 matrix:
   include:
 
-  # Ubuntu, g++-9
   - os: linux
     dist: xenial
     compiler: gcc
@@ -17,16 +17,16 @@ matrix:
         sources:
         - ubuntu-toolchain-r-test
         packages:
-          - libboost-all-dev
-          - g++-9
-          - gcc-9
+        - libboost-all-dev
+        - g++-9
+        - gcc-9
     env:
     - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
-    - LABEL="linux"
-    - _DEPLOYABLE="true"
     - STRIP="strip"
+    - _LABEL="linux"
+    - _OS_TAG="nix"
+    - _ADDRESS_MODE="x64"
 
-  # Ubuntu, g++-8
   - os: linux
     dist: xenial
     compiler: gcc
@@ -35,16 +35,17 @@ matrix:
         sources:
         - ubuntu-toolchain-r-test
         packages:
-          - libboost-all-dev
-          - g++-8
-          - gcc-8
+        - libboost-all-dev
+        - g++-8
+        - gcc-8
     env:
     - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-    - LABEL="linux"
-    - _DEPLOYABLE="true"
     - STRIP="strip"
+    - _LABEL="linux"
+    - _OS_TAG="nix"
+    - _ADDRESS_MODE="x64"
+    - _DEPLOYABLE="true"
 
-  # Ubuntu, g++-7
   - os: linux
     dist: xenial
     compiler: gcc
@@ -53,24 +54,57 @@ matrix:
         sources:
         - ubuntu-toolchain-r-test
         packages:
-          - libboost-all-dev
-          - g++-7
-          - gcc-7
+        - libboost-all-dev
+        - g++-7
+        - gcc-7
     env:
     - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-    - LABEL="linux-g++-7"
     - STRIP="strip"
-  
-  # OSX 
+    - _LABEL="linux"
+    - _OS_TAG="nix"
+    - _ADDRESS_MODE="x64"
+    
   - os: osx
     osx_image: xcode11.2
     env:
-      - MATRIX_EVAL="brew install gcc boost && CC=gcc-7 && CXX=g++-7
-
+    - MATRIX_EVAL="brew install gcc boost && CC=gcc-7 && CXX=g++-7
+    - STRIP="strip"
+    - _LABEL="osx"
+    - _OS_TAG="osx"
+    - _ADDRESS_MODE="x64"
+    - _DEPLOYABLE="true"
+    
 before_install:
-  - eval "${MATRIX_EVAL}"    
+- eval "${MATRIX_EVAL}"
 
 script:
-  - eval "${MATRIX_EVAL}"
-  - cmake -DSTATIC=true -S . -Bbuild 
-  - make -j2 -Cbuild
+- eval "${MATRIX_EVAL}"
+- cmake -DSTATIC=true -S . -Bbuild -DSTATIC=ON -DARCH=default
+- make -j$(nproc) -Cbuild
+
+before_deploy:
+- if [[ "${TRAVIS_TAG}" == "" ]]; then export TRAVIS_TAG=${TRAVIS_COMMIT} ; fi
+
+- cd build/src
+- TARGETS="adond simplewallet walletd miner"
+- "${STRIP} ${TARGETS}"
+- rm -rf adon-cli.${TRAVIS_TAG}
+- mkdir adon-cli.${TRAVIS_TAG}
+- cp ${TARGETS} adon-cli.${TRAVIS_TAG}/
+- tar cvfz adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz adon-cli.${TRAVIS_TAG}/
+- rm -rf builds
+- mkdir builds
+- cp adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz builds/
+
+deploy:
+  provider: releases
+  api_key:
+    secure: z8F8JxaFxGGBYoY90qirkgiya7ttpJkFdmDuB8lzUEbwBDJ5VRd8UVA8SetcxQSobtxsjRgKpBJIYBRqMtXpWjwI/Vaowj0asIl8OFU3Hf2hFARycSEJPgpb9bYRbxjBoTIhD6SSjP1x4fZEGj8ZIOsVgTMtyTwOWMw/6GC2p22+43JJIOYJfzHEaPDPPbH+a0SRHPqQNn66ZXadqGgzNs3lQjL8SCb9wpEQBMZKgejyAjdaJDpol+IuOwq8uBDUDGJJqjYzukhobnlE2Dofg0UZJEvGLn5x+x61rjVARE5C5KXjqWSHxHR46Cm29l+18a44bvWa1kSr3SwUiDtyrJzGWvcclkbSkk7zdjL6jAsJnvge/+FajTZ74us/zXllcQ0xa8XKeQbNuRtdcs/s4gFhnGdPUo4Md4LKFhin5nPHyeF9zy2lHqQZ8Z8fHReAkt+vtaR3MN6sQjWZvYzeOW4z9/hKx3Z6IuqhH7Svl8Y04y9UkD9lxFZp0XLxGsPkRQEaR1RW8+v7nDwV6VBzhi9l+wWF/6PXP5ijI6Lsd1nC5E8d967AO5kSp2BK9EDnUuBA1zR3vRI63qh/b0N8MqBGfJgkwCzPsLtQRZv6wzmuejGH3FvEjRt+xhd6cZv2AoVz3s/Ba2T0bOza2raz1oSqhbcj53g7EjXbK96bs78=
+  file: 
+    - adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz
+  skip_cleanup: true
+  on:
+    repo: adon-net/adon-core
+    branch: develop
+    tags: true
+    condition: "$_DEPLOYABLE = true"
