@@ -88,10 +88,10 @@ before_deploy:
 - cd build/src
 - TARGETS="adond simplewallet walletd miner"
 - "${STRIP} ${TARGETS}"
-- rm -rf adon-cli.${TRAVIS_TAG}
-- mkdir adon-cli.${TRAVIS_TAG}
-- cp ${TARGETS} adon-cli.${TRAVIS_TAG}/
-- tar cvfz adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz adon-cli.${TRAVIS_TAG}/
+- rm -rf adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}
+- mkdir adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}
+- cp ${TARGETS} adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}/
+- tar cvfz adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}/
 - rm -rf builds
 - mkdir builds
 - cp adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz builds/
@@ -106,5 +106,5 @@ deploy:
   on:
     repo: adon-net/adon-core
     branch: develop
-    tags: true
+    # tags: true
     condition: "$_DEPLOYABLE = true"
