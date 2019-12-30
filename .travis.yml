@@ -106,5 +106,5 @@ deploy:
   on:
     repo: adon-net/adon-core
     branch: develop
-    # tags: true
+    tags: true
     condition: "$_DEPLOYABLE = true"

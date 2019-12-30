@@ -85,6 +85,6 @@ deploy:
     prerelease: false
     on:
       appveyor_repo_name: adon-net/adon-core
-      # appveyor_repo_tag: true
+      appveyor_repo_tag: true
       configuration: Release
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
