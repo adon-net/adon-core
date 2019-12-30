@@ -1,40 +1,90 @@
+shallow_clone: true
+
+platform:
+  - x86
+  - x64
+
+configuration:
+  # - Debug
+  - Release
+
 image:
   - Visual Studio 2019
+  # - Visual Studio 2017
 
 cache:
   - c:\users\appveyor\clcache
   - c:\local\boost_1_69_0
+
 environment:
   BOOST_ROOT: C:\local\boost_1_69_0
   BOOST_LIB_PATH_X64: C:\local\boost_1_69_0\lib64-msvc-14.1
-  BOOST_LIB_PATH_X32: C:\local\boost_1_69_0\lib32-msvc-14.1
+  BOOST_LIB_PATH_X86: C:\local\boost_1_69_0\lib32-msvc-14.1
+  VCVAR2017: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat'
+  VCVAR2019: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat'
+  matrix:
+    - GSL_CXX_STANDARD: '17'
+      USE_TOOLSET: MSVC
+      USE_GENERATOR: MSBuild
 
 init:
   - set PATH=c:\Python37;c:\Python37\Scripts;%PATH%
   - pip install clcache
 
-before_build:
-  - clcache -s
-
 install:
   - ps: Write-Host "Checking for Boost 1.69.0 x64...";$boostdir  = Test-Path $Env:BOOST_LIB_PATH_X64;If ($boostdir -eq $False) {Write-Host "Downloading Boost 1.69.0 x64...";$exePath = "$Env:TEMP\boost_1_69_0-msvc-14.1-64.exe";(New-Object Net.WebClient).DownloadFile('https://bintray.com/boostorg/release/download_file?file_path=1.69.0%2Fbinaries%2Fboost_1_69_0-msvc-14.1-64.exe', $exePath);Write-Host "Installing Boost 1.69.0 x64...";cmd /c start /wait "$exePath" /verysilent;del $exePath};Write-Host "Boost 1.69.0 x64 installed!" -ForegroundColor Green
-  - ps: Write-Host "Checking for Boost 1.69.0 x32...";$boostdir  = Test-Path $Env:BOOST_LIB_PATH_X32;If ($boostdir -eq $False) {Write-Host "Downloading Boost 1.69.0 x32...";$exePath = "$Env:TEMP\boost_1_69_0-msvc-14.1-32.exe";(New-Object Net.WebClient).DownloadFile('https://bintray.com/boostorg/release/download_file?file_path=1.69.0%2Fbinaries%2Fboost_1_69_0-msvc-14.1-32.exe', $exePath);Write-Host "Installing Boost 1.69.0 x32...";cmd /c start /wait "$exePath" /verysilent;del $exePath};Write-Host "Boost 1.69.0 x32 installed!" -ForegroundColor Green
+  - ps: Write-Host "Checking for Boost 1.69.0 x86...";$boostdir  = Test-Path $Env:BOOST_LIB_PATH_X86;If ($boostdir -eq $False) {Write-Host "Downloading Boost 1.69.0 x86...";$exePath = "$Env:TEMP\boost_1_69_0-msvc-14.1-32.exe";(New-Object Net.WebClient).DownloadFile('https://bintray.com/boostorg/release/download_file?file_path=1.69.0%2Fbinaries%2Fboost_1_69_0-msvc-14.1-32.exe', $exePath);Write-Host "Installing Boost 1.69.0 x86...";cmd /c start /wait "$exePath" /verysilent;del $exePath};Write-Host "Boost 1.69.0 x86 installed!" -ForegroundColor Green
+
+
+before_build:
+  - clcache -s
+  - ps: |
+      $GeneratorFlags = '/m /v:minimal'
+      if ("$env:APPVEYOR_BUILD_WORKER_IMAGE" -eq "Visual Studio 2017") {
+        $Generator = 'Visual Studio 15 2017'
+      } else {
+        $Generator = 'Visual Studio 16 2019'
+      }
+      if ("$env:PLATFORM" -eq "x86") { 
+          $Architecture = "Win32"
+          $env:_ADDRESS_MODE = "x86"
+      } else { 
+          $Architecture = "x64" 
+          $env:_ADDRESS_MODE = "x64"
+      }
+      $env:CMakeGenFlags = "-G `"$Generator`" -A $Architecture -DGSL_CXX_STANDARD=$env:GSL_CXX_STANDARD"
+      $env:CMakeBuildFlags = "--config $env:CONFIGURATION -- $GeneratorFlags"
+  - mkdir build
+  - cd build
+  - echo %CMakeGenFlags%
+  - cmake .. %CMakeGenFlags%
 
 build_script:
-  - ps: Write-Host "Building solution for Visual Studio 2019 x64 Platform"
-  - ps: pushd
-  - md build-vs19-x64
-  - cd build-vs19-x64
-  - cmake -G "Visual Studio 16 2019" -A x64 ..
-  - MSBuild Adon.sln /p:Configuration=Release /m
-  - src\Release\cryptotest.exe
-  - ps: popd
+  - echo %CMakeBuildFlags%
+  - cmake --build . %CMakeBuildFlags%
 
-  - ps: Write-Host "Building solution for Visual Studio 2019 x86 Platform"
-  - ps: pushd
-  - md build-vs19-x86
-  - cd build-vs19-x86
-  - cmake -G "Visual Studio 16 2019" -A Win32 ..
-  - MSBuild Adon.sln /p:Configuration=Release /p:Platform=Win32 /m
-  - src\Release\cryptotest.exe
-  - ps: popd
+after_build:
+  - clcache -s
+  - if not defined APPVEYOR_REPO_TAG_NAME (set APPVEYOR_REPO_TAG_NAME=%APPVEYOR_REPO_COMMIT%)
+  - cd src\%CONFIGURATION%
+  - mkdir adon-cli-%APPVEYOR_REPO_TAG_NAME%-win.%_ADDRESS_MODE%
+  - copy *.exe adon-cli-%APPVEYOR_REPO_TAG_NAME%-win.%_ADDRESS_MODE%
+  - 7z a adon-cli-%APPVEYOR_REPO_TAG_NAME%-win.%_ADDRESS_MODE%.zip adon-cli-%APPVEYOR_REPO_TAG_NAME%-win.%_ADDRESS_MODE%
+  - copy adon-cli-%APPVEYOR_REPO_TAG_NAME%-win.%_ADDRESS_MODE%.zip ..\..\..\
+
+artifacts:
+  - path: adon-cli-%APPVEYOR_REPO_TAG_NAME%-win.%_ADDRESS_MODE%.zip
+    name: adon-cli-release
+
+deploy:
+  - provider: GitHub
+    auth_token:
+      secure: 1PEI0gPKUp6NC2zNmqjVb5Vpm4vz9ErktB5At05xZi8zzmWpMToitcOj1dijXV0S
+    artifact: adon-cli-release
+    draft: false
+    prerelease: false
+    on:
+      appveyor_repo_name: adon-net/adon-core
+      appveyor_repo_tag: true
+      configuration: Release
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
