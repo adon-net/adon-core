@@ -28,7 +28,6 @@ file(GLOB_RECURSE JsonRpcServer JsonRpcServer/*)
 file(GLOB_RECURSE Daemon Daemon/*)
 file(GLOB_RECURSE SimpleWallet SimpleWallet/*)
 file(GLOB_RECURSE PaymentGateService PaymentGateService/*)
-file(GLOB_RECURSE ConnectivityTool ConnectivityTool/*)
 file(GLOB_RECURSE Miner Miner/*)
 
 if(MSVC)
@@ -44,7 +43,7 @@ else()
 endif()
 
 
-source_group("" FILES ${Common} ${Config} ${ConnectivityTool} ${Crypto} ${CryptoNoteCore} ${CryptoNoteProtocol} ${Daemon} ${JsonRpcServer} ${Http} ${Logging} ${NodeRpcProxy} ${P2p} ${Rpc} ${Serialization} ${SimpleWallet} ${System} ${Transfers} ${Wallet} ${WalletLegacy} ${Mnemonics}  ${CryptoTest})
+source_group("" FILES ${Common} ${Config} ${Crypto} ${CryptoNoteCore} ${CryptoNoteProtocol} ${Daemon} ${JsonRpcServer} ${Http} ${Logging} ${NodeRpcProxy} ${P2p} ${Rpc} ${Serialization} ${SimpleWallet} ${System} ${Transfers} ${Wallet} ${WalletLegacy} ${Mnemonics}  ${CryptoTest})
 
 add_library(BlockchainExplorer STATIC ${BlockchainExplorer})
 add_library(Common STATIC ${Common})
@@ -71,7 +70,6 @@ add_executable(Daemon             ${Daemon}            )
 add_executable(SimpleWallet       ${SimpleWallet}      )
 add_executable(PaymentGateService ${PaymentGateService})
 add_executable(Miner              ${Miner}             )
-add_executable(ConnectivityTool   ${ConnectivityTool}  )
 add_executable(CryptoTest         ${CryptoTest}        )
 
 target_link_libraries(Common)
@@ -88,7 +86,6 @@ target_link_libraries(Daemon Rpc Config CryptoNoteCore CryptoNoteProtocol Loggin
 target_link_libraries(SimpleWallet Common CryptoNoteCore Wallet NodeRpcProxy Transfers  Serialization Mnemonics ${Boost_LIBRARIES})
 target_link_libraries(PaymentGateService PaymentGate Wallet WalletLegacy NodeRpcProxy P2P Serialization InProcessNode JsonRpcServer NodeRpcProxy BlockchainExplorer ${Boost_LIBRARIES})
 target_link_libraries(Miner Crypto Common CryptoNoteCore ${Boost_LIBRARIES})
-target_link_libraries(ConnectivityTool Crypto Common CryptoNoteCore BlockchainExplorer ${Boost_LIBRARIES})
 target_link_libraries(CryptoTest Crypto Common ${Boost_LIBRARIES})
 
 if (MSVC)
@@ -125,10 +122,9 @@ add_dependencies(PaymentGateService version)
 add_dependencies(CryptoTest         version)
 
 
-set_property(TARGET Daemon             PROPERTY OUTPUT_NAME "adond")
-set_property(TARGET SimpleWallet       PROPERTY OUTPUT_NAME "simplewallet")
-set_property(TARGET PaymentGateService PROPERTY OUTPUT_NAME "walletd")
-set_property(TARGET Miner              PROPERTY OUTPUT_NAME "miner")
-set_property(TARGET ConnectivityTool   PROPERTY OUTPUT_NAME "connectivity_tool")
+set_property(TARGET Daemon             PROPERTY OUTPUT_NAME "adon-daemon")
+set_property(TARGET SimpleWallet       PROPERTY OUTPUT_NAME "adon-wallet-cli")
+set_property(TARGET PaymentGateService PROPERTY OUTPUT_NAME "adon-wallet-rpc")
+set_property(TARGET Miner              PROPERTY OUTPUT_NAME "adon-miner")
 set_property(TARGET CryptoTest         PROPERTY OUTPUT_NAME "cryptotest")
 
