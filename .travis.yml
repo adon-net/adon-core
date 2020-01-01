@@ -86,7 +86,7 @@ before_deploy:
 - if [[ "${TRAVIS_TAG}" == "" ]]; then export TRAVIS_TAG=${TRAVIS_COMMIT} ; fi
 
 - cd build/src
-- TARGETS="adond simplewallet walletd miner"
+- TARGETS="adon-daemon adon-wallet-cli adon-wallet-rpc adon-miner"
 - "${STRIP} ${TARGETS}"
 - rm -rf adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}
 - mkdir adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}
