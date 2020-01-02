@@ -64,6 +64,27 @@ matrix:
     - _OS_TAG="nix"
     - _ADDRESS_MODE="x64"
     
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-7
+        - gcc-7
+        - gcc-7-multilib
+        - g++-7-multilib
+        - libc6-dev-i386
+    env:
+    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - STRIP="strip"
+    - _LABEL="linux"
+    - _OS_TAG="nix"
+    - _ADDRESS_MODE="x86"   
+    - _DEPLOYABLE="true"
+
   - os: osx
     osx_image: xcode11.2
     env:
@@ -79,6 +100,8 @@ before_install:
 
 script:
 - eval "${MATRIX_EVAL}"
+- if [[ "$LABEL" == "linux" ] && [ _ADDRESS_MODE == "x86" ]]; then source extras/prep-env.sh "x86_64_x86" ; fi
+
 - cmake -DSTATIC=true -S . -Bbuild -DSTATIC=ON -DARCH=default
 - make -j$(nproc) -Cbuild
 
