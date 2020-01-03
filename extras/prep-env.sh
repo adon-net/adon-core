@@ -1,9 +1,10 @@
 #!/bin/bash
 
 export BASEDIR=`pwd`
-export TOOLCHAIN_DIR=$BASEDIR/extras/.buildenv/toolchain
+export TOOLCHAIN_DIR=$HOME/.buildenv/toolchain
 export BOOST_VER=1.65.1
-export BOOST_ROOT=$BASEDIR/extras/.buildenv/boost_${BOOST_VER//[.]/_}
+export BOOST_ROOT=$HOME/.buildenv/boost_${BOOST_VER//[.]/_}
+export CUSTOM_TOOLCHAIN_FILE=""
 
 CROSS_GCC=cross-gcc-8.3.0
 CROSS_PI=cross-pi-gcc-8.3.0
@@ -131,7 +132,7 @@ _build_boost_x86_64_x86(){
   export BOOST_ROOT=$BOOST_ROOT/x86
   echo "...Chekcing Boost    : " $BOOST_SRC
 
-  if [ ! -f "$BOOST_ROOT/lib/libboost_atomic.a" ]
+  if [ ! -f "$BOOST_ROOT/lib/libboost_atomic-mt.a" ]
   then
     echo "....Downloading      : " $BOOST_SRC
     __download_boost
@@ -171,7 +172,7 @@ _build_boost_armv6_x86(){
       --reconfigure --prefix=$BOOST_ROOT install \
       --with-atomic --with-chrono --with-date_time --with-filesystem --with-program_options \
       --with-regex --with-serialization --with-system --with-thread --with-context --with-coroutine \
-      --user-config=user-config-arm-pi-0-1-32.jam 
+      --user-config=user-config-arm-pi-0-1-32.jam > /dev/null
   else
     echo "....Boost found      : " $BOOST_SRC
   fi
@@ -260,6 +261,8 @@ setup_env_x86_64_x86(){
   echo "Setting up boost for :  x86_64 32Bit"
   _build_boost_x86_64_x86
 
+  export CUSTOM_TOOLCHAIN_FILE=$BASEDIR/extras/toolchain/cross-linux-x86.cmake
+
   __print_env
 }
 
@@ -268,6 +271,8 @@ setup_env_armv6_x86(){
   _setup_toolchain_armv6_x86
   echo "Setting up boost for :  armv6 x86"
   _build_boost_armv6_x86  
+
+  export CUSTOM_TOOLCHAIN_FILE=$BASEDIR/extras/toolchain/cross-arm-pi-0-1.cmake
 
   __print_env
 }
@@ -278,6 +283,8 @@ setup_env_armv7-a_x86(){
   echo "Setting up boost for :  armv7-a x86"
   _build_boost_armv7-a_x86 
 
+  export CUSTOM_TOOLCHAIN_FILE=$BASEDIR/extras/toolchain/cross-arm-pi-2-3.cmake
+
   __print_env
 }
 
@@ -286,6 +293,8 @@ setup_env_armv8-a_x86(){
   _setup_toolchain_armv8-a_x86 
   echo "Setting up boost for : armv8-a x86"
   _build_boost_armv8-a_x86 
+
+  export CUSTOM_TOOLCHAIN_FILE=$BASEDIR/extras/toolchain/cross-arm-pi-3+-32.cmake
 
   __print_env
 }
@@ -296,10 +305,20 @@ setup_env_armv8-a_x64(){
   echo "Setting up boost for : armv8-a x64"
   _build_boost_armv8-a_x64 
 
+  export CUSTOM_TOOLCHAIN_FILE=$BASEDIR/extras/toolchain/cross-arm-pi-3+-64.cmake
+
   __print_env
 }
 
-case $1 in
+
+if [ -z "$_ENV_ARCH" ]
+then
+  __ARCH=$1
+else
+  __ARCH=$_ENV_ARCH
+fi
+
+case $__ARCH in
   armv6_x86)
     setup_env_armv6_x86
     ;;
