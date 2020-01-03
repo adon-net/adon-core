@@ -1,4 +1,3 @@
-sudo: false
 language: cpp
 
 cache:
@@ -9,6 +8,7 @@ cache:
 matrix:
   include:
 
+  # Ubuntu, gcc-9, g++-9, 64 Bit
   - os: linux
     dist: xenial
     compiler: gcc
@@ -27,6 +27,7 @@ matrix:
     - _OS_TAG="nix"
     - _ADDRESS_MODE="x64"
 
+  # Ubuntu, gcc-8, g++-8, 64 Bit
   - os: linux
     dist: xenial
     compiler: gcc
@@ -46,6 +47,7 @@ matrix:
     - _ADDRESS_MODE="x64"
     - _DEPLOYABLE="true"
 
+  # Ubuntu, gcc-7, g++-7, 64 Bit
   - os: linux
     dist: xenial
     compiler: gcc
@@ -63,7 +65,8 @@ matrix:
     - _LABEL="linux"
     - _OS_TAG="nix"
     - _ADDRESS_MODE="x64"
-    
+
+  # Ubuntu, gcc-7, g++-7, 32 Bit    
   - os: linux
     dist: xenial
     compiler: gcc
@@ -88,8 +91,10 @@ matrix:
     - _DEPLOYABLE="true"
     - _ENV_ARCH="x86_64_x86"
 
+  # OSX, gcc-7, g++-7, 32 Bit    
   - os: osx
     osx_image: xcode11.2
+    compiler: gcc
     env:
     - MATRIX_EVAL="brew install gcc boost && CC=gcc-7 && CXX=g++-7
     - STRIP="strip"
@@ -98,12 +103,68 @@ matrix:
     - _ADDRESS_MODE="x64"
     - _DEPLOYABLE="true"
     
+  # Ubuntu, arm-linux-gnueabihf-gcc, arm-linux-gnueabihf-g++, 32 Bit ;;  
+  # cross-pi-gcc-8.3.0 [pi zero, zero w, 1 ;; armv6]    
+  - os: linux
+    dist: xenial
+    env:
+    - MATRIX_EVAL="CC=arm-linux-gnueabihf-gcc && CXX=arm-linux-gnueabihf-g++"
+    - STRIP="arm-linux-gnueabihf-strip"
+    - _LABEL="linux"
+    - _OS_TAG="pi-armv6"
+    - _ADDRESS_MODE="x86"   
+    - _DEPLOYABLE="true"
+    - _ENV_ARCH="armv6_x86"
+
+  # Ubuntu, arm-linux-gnueabihf-gcc, arm-linux-gnueabihf-g++, 32 Bit ;; 
+  # cross-pi-gcc-8.3.0 [pi 2, 3 ;; armv7]    
+  - os: linux
+    dist: xenial
+    env:
+    - MATRIX_EVAL="CC=arm-linux-gnueabihf-gcc && CXX=arm-linux-gnueabihf-g++"
+    - STRIP="arm-linux-gnueabihf-strip"
+    - _LABEL="linux"
+    - _OS_TAG="pi-armv7"
+    - _ADDRESS_MODE="x86"   
+    - _DEPLOYABLE="true"
+    - _ENV_ARCH="armv7-a_x86"
+
+  # Ubuntu, arm-linux-gnueabihf-gcc, arm-linux-gnueabihf-g++, 32 Bit ;; 
+  # cross-pi-gcc-8.3.0 [pi 3+ ;; armv8]    
+  - os: linux
+    dist: xenial
+    env:
+    - MATRIX_EVAL="CC=arm-linux-gnueabihf-gcc && CXX=arm-linux-gnueabihf-g++"
+    - STRIP="arm-linux-gnueabihf-strip"
+    - _LABEL="linux"
+    - _OS_TAG="pi-armv8"
+    - _ADDRESS_MODE="x86"   
+    - _DEPLOYABLE="true"
+    - _ENV_ARCH="armv8-a_x86"    
+
+  # Ubuntu, aarch64-linux-gnu-gcc, aarch64-linux-gnu-g++, 64 Bit ;; 
+  # cross-pi-gcc-8.3.0 [pi 3+ ;; armv8]    
+  - os: linux
+    dist: xenial
+    env:
+    - MATRIX_EVAL="CC=aarch64-linux-gnu-gcc && CXX=aarch64-linux-gnu-g++"
+    - STRIP="arm-linux-gnueabihf-strip"
+    - _LABEL="linux"
+    - _OS_TAG="pi-armv8"
+    - _ADDRESS_MODE="x86"   
+    - _DEPLOYABLE="true"
+    - _ENV_ARCH="armv8-a_x64"
+
 before_install:
 - eval "${MATRIX_EVAL}"
 
 script:
 - eval "${MATRIX_EVAL}"
-- if [ "$_LABEL" == "linux" ] && [ $_ENV_ARCH == "x86_64_x86" ]; then source extras/prep-env.sh ; fi
+- if [[ $_ENV_ARCH == "x86_64_x86" ]];  then source extras/prep-env.sh ; fi
+- if [[ $_ENV_ARCH == "armv6_x86" ]];   then source extras/prep-env.sh ; fi
+- if [[ $_ENV_ARCH == "armv7-a_x86" ]]; then source extras/prep-env.sh ; fi
+- if [[ $_ENV_ARCH == "armv8-a_x86" ]]; then source extras/prep-env.sh ; fi
+- if [[ $_ENV_ARCH == "armv8-a_x64" ]]; then source extras/prep-env.sh ; fi
 
 - cmake -DSTATIC=true -S . -Bbuild -DSTATIC=ON -DARCH=default -DCMAKE_TOOLCHAIN_FILE=${CUSTOM_TOOLCHAIN_FILE}
 - make -j$(nproc) -Cbuild
@@ -128,9 +189,9 @@ deploy:
     secure: z8F8JxaFxGGBYoY90qirkgiya7ttpJkFdmDuB8lzUEbwBDJ5VRd8UVA8SetcxQSobtxsjRgKpBJIYBRqMtXpWjwI/Vaowj0asIl8OFU3Hf2hFARycSEJPgpb9bYRbxjBoTIhD6SSjP1x4fZEGj8ZIOsVgTMtyTwOWMw/6GC2p22+43JJIOYJfzHEaPDPPbH+a0SRHPqQNn66ZXadqGgzNs3lQjL8SCb9wpEQBMZKgejyAjdaJDpol+IuOwq8uBDUDGJJqjYzukhobnlE2Dofg0UZJEvGLn5x+x61rjVARE5C5KXjqWSHxHR46Cm29l+18a44bvWa1kSr3SwUiDtyrJzGWvcclkbSkk7zdjL6jAsJnvge/+FajTZ74us/zXllcQ0xa8XKeQbNuRtdcs/s4gFhnGdPUo4Md4LKFhin5nPHyeF9zy2lHqQZ8Z8fHReAkt+vtaR3MN6sQjWZvYzeOW4z9/hKx3Z6IuqhH7Svl8Y04y9UkD9lxFZp0XLxGsPkRQEaR1RW8+v7nDwV6VBzhi9l+wWF/6PXP5ijI6Lsd1nC5E8d967AO5kSp2BK9EDnUuBA1zR3vRI63qh/b0N8MqBGfJgkwCzPsLtQRZv6wzmuejGH3FvEjRt+xhd6cZv2AoVz3s/Ba2T0bOza2raz1oSqhbcj53g7EjXbK96bs78=
   file: 
     - adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz
-  skip_cleanup: true
+  cleanup: false
   on:
     repo: adon-net/adon-core
-    branch: develop
+    branch: master
     tags: true
     condition: "$_DEPLOYABLE = true"
