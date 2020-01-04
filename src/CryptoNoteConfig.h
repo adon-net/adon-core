@@ -74,7 +74,7 @@ const uint64_t DEPOSIT_MIN_AMOUNT                            = 5000 * COIN;
 const uint32_t DEPOSIT_MIN_TERM                              = 1 * NUMBER_OF_BLOCKS_PER_DAY * 30;
 const uint32_t DEPOSIT_MAX_TERM                              = 1 * 12 * DEPOSIT_MIN_TERM;
 const uint64_t DEPOSIT_MIN_TOTAL_RATE_FACTOR                 = 0;
-const uint64_t DEPOSIT_MAX_TOTAL_RATE                        = 3;
+const uint64_t DEPOSIT_MAX_TOTAL_RATE                        = 6;
 const double   REMOTE_NODE_MIN_FEE                           = .0025;
 const int64_t  REMOTE_NODE_MAX_FEE                           = COIN * 100;
 static_assert(DEPOSIT_MIN_TERM > 0, "Bad DEPOSIT_MIN_TERM");
