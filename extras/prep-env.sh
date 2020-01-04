@@ -53,7 +53,7 @@ _setup_toolchain_armv6_x86(){
     fi
     cd /tmp
     echo "....Extracting       : " $_TOOLCHAIN_FILE
-    tar xfv /tmp/$_TOOLCHAIN_FILE -C $TOOLCHAIN_DIR 
+    tar xfv /tmp/$_TOOLCHAIN_FILE -C $TOOLCHAIN_DIR > /dev/null
   fi
   echo "....Setting up       : " $CROSS_GCC-pi_0-1
   export TOOLCHAIN_DIR=$TOOLCHAIN_DIR/$CROSS_PI-0
