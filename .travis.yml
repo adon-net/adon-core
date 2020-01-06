@@ -179,9 +179,9 @@ before_deploy:
 - mkdir adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}
 - cp ${TARGETS} adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}/
 - tar cvfz adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}/
-- rm -rf builds
-- mkdir builds
-- cp adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz builds/
+# - rm -rf builds
+# - mkdir builds
+# - cp adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz builds/
 
 deploy:
   provider: releases
