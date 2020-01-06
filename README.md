@@ -176,5 +176,3 @@ The binaries will be in the `src/Release` folder when you are complete.
 - `cd Release`
 - `adon-daemon.exe --version`
 
-And then do Build.
-Good luck!
