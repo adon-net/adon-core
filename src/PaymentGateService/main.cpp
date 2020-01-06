@@ -10,9 +10,12 @@
 #include <string.h>
 
 #include "PaymentGateService.h"
+
+#include <Config/CliHeader.h>
 #include "version.h"
 
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN 
 #include <windows.h>
 #include <winsvc.h>
 #else
@@ -285,13 +288,13 @@ int unregisterService() {
 int main(int argc, char** argv) {
   PaymentGateService pg; 
   ppg = &pg;
-  std::cout << CRYPTONOTE_NAME << " walletd v" << PROJECT_VERSION_LONG << std::endl;
+  
+  std::cout << getProjectCLIHeader() << std::endl;
+  
   try {
     if (!pg.init(argc, argv)) {
       return 0; //help message requested or so
     }
-
-    Logging::LoggerRef(pg.getLogger(), "main")(Logging::INFO) << "walled v" << PROJECT_VERSION_LONG;
 
     const auto& config = pg.getConfig();
 

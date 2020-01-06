@@ -75,7 +75,17 @@ size_t TcpConnection::read(uint8_t* data, size_t size) {
   std::string message;
   ssize_t transferred = ::recv(connection, (void *)data, size, 0);
   if (transferred == -1) {
-    if (errno != EAGAIN  && errno != EWOULDBLOCK) {
+    bool knownError = false;
+
+    if (errno == EAGAIN) {
+      knownError = true;
+    }
+
+    if (errno == EWOULDBLOCK) {
+      knownError = true;
+    }
+
+    if (!knownError) {
       message = "recv failed, " + lastErrorMessage();
     } else {
       OperationContext context;

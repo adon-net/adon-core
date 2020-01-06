@@ -63,24 +63,23 @@ namespace CryptoNote
     if (m_template.majorVersion == BLOCK_MAJOR_VERSION_2 ||
         m_template.majorVersion == BLOCK_MAJOR_VERSION_3 ||
         m_template.majorVersion == BLOCK_MAJOR_VERSION_4 ||
-        m_template.majorVersion == BLOCK_MAJOR_VERSION_5) {
+        m_template.majorVersion == BLOCK_MAJOR_VERSION_5 ||
+        m_template.majorVersion == BLOCK_MAJOR_VERSION_6) {
       CryptoNote::TransactionExtraMergeMiningTag mm_tag;
       mm_tag.depth = 0;
-      if (!CryptoNote::get_aux_block_header_hash(m_template,
-                                                 mm_tag.merkleRoot)) {
+      if (!CryptoNote::get_aux_block_header_hash(m_template, mm_tag.merkleRoot)) {
         return false;
       }
 
       m_template.parentBlock.baseTransaction.extra.clear();
-      if (!CryptoNote::appendMergeMiningTagToExtra(
-              m_template.parentBlock.baseTransaction.extra, mm_tag)) {
+      if (!CryptoNote::appendMergeMiningTagToExtra(m_template.parentBlock.baseTransaction.extra, mm_tag)) {
         return false;
       }
     }
 
     m_diffic = di;
     ++m_template_no;
-    m_starter_nonce = Crypto::rand<uint32_t>();
+    m_starter_nonce = Random::randomValue<uint32_t>();
     return true;
   }
   //-----------------------------------------------------------------------------------------------------
@@ -223,7 +222,7 @@ namespace CryptoNote
 
     m_mine_address = adr;
     m_threads_total = static_cast<uint32_t>(threads_count);
-    m_starter_nonce = Crypto::rand<uint32_t>();
+    m_starter_nonce = Random::randomValue<uint32_t>();
 
     if (!m_template_no) {
       request_block_template(); //lets update block template
@@ -269,7 +268,7 @@ namespace CryptoNote
     return true;
   }
   //-----------------------------------------------------------------------------------------------------
-  bool miner::find_nonce_for_given_block(Crypto::cn_context &context, Block& bl, const difficulty_type& diffic) {
+  bool miner::find_nonce_for_given_block(Block& bl, const difficulty_type& diffic) {
 
     unsigned nthreads = std::thread::hardware_concurrency();
 
@@ -277,11 +276,10 @@ namespace CryptoNote
       std::vector<std::future<void>> threads(nthreads);
       std::atomic<uint32_t> foundNonce;
       std::atomic<bool> found(false);
-      uint32_t startNonce = Crypto::rand<uint32_t>();
+      uint32_t startNonce = Random::randomValue<uint32_t>();
 
       for (unsigned i = 0; i < nthreads; ++i) {
         threads[i] = std::async(std::launch::async, [&, i]() {
-          Crypto::cn_context localctx;
           Crypto::Hash h;
 
           Block lb(bl); // copy to local block
@@ -289,7 +287,7 @@ namespace CryptoNote
           for (uint32_t nonce = startNonce + i; !found; nonce += nthreads) {
             lb.nonce = nonce;
 
-            if (!get_block_longhash(localctx, lb, h)) {
+            if (!get_block_longhash(lb, h)) {
               return;
             }
 
@@ -314,7 +312,7 @@ namespace CryptoNote
     } else {
       for (; bl.nonce != std::numeric_limits<uint32_t>::max(); bl.nonce++) {
         Crypto::Hash h;
-        if (!get_block_longhash(context, bl, h)) {
+        if (!get_block_longhash(bl, h)) {
           return false;
         }
 
@@ -361,7 +359,6 @@ namespace CryptoNote
     uint32_t nonce = m_starter_nonce + th_local_index;
     difficulty_type local_diff = 0;
     uint32_t local_template_ver = 0;
-    Crypto::cn_context context;
     Block b;
 
     while(!m_stop)
@@ -391,7 +388,7 @@ namespace CryptoNote
 
       b.nonce = nonce;
       Crypto::Hash h;
-      if (!m_stop && !get_block_longhash(context, b, h)) {
+      if (!m_stop && !get_block_longhash(b, h)) {
         logger(ERROR) << "Failed to get block long hash";
         m_stop = true;
       }

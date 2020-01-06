@@ -24,9 +24,9 @@
 #include <Logging/LoggerManager.h>
 #include <Logging/LoggerRef.h>
 
-#include "WalletLegacy/WalletLegacy.h"
 #include <System/Dispatcher.h>
 #include <System/Ipv4Address.h>
+#include "WalletLegacy/WalletLegacy.h"
 
 std::string remote_fee_address;
 
@@ -69,8 +69,8 @@ private:
 
     bool new_wallet(const std::string& wallet_file, const std::string& password);
     bool new_wallet(Crypto::SecretKey& secret_key, Crypto::SecretKey& view_key, const std::string& wallet_file, const std::string& password);
-    bool new_wallet(AccountKeys &private_key, const std::string &wallet_file, const std::string& password);
-    bool new_tracking_wallet(AccountKeys &tracking_key, const std::string &wallet_file, const std::string& password);
+    bool new_wallet(AccountKeys &private_key, const std::string &wallet_file, const std::string &password);
+    bool new_tracking_wallet(AccountKeys &tracking_key, const std::string &wallet_file, const std::string &password);
     bool open_wallet(const std::string& wallet_file, const std::string& password);
     bool gen_wallet(const std::string& wallet_file, const std::string& password, const Crypto::SecretKey& recovery_key = Crypto::SecretKey(), bool recover = false, bool two_random = false);
     bool close_wallet();
@@ -102,10 +102,9 @@ private:
     bool get_reserve_proof(const std::vector<std::string>& args);
     bool create_integrated(const std::vector<std::string>& args = std::vector<std::string>());
     bool get_unlocked_outputs(const std::vector<std::string>& args);
-    bool deposit(const std::vector<std::string>& args);
-    bool withdraw(const std::vector<std::string>& args);
-    bool calculate_interest(const std::vector<std::string>& args);
-    bool deposit_list(const std::vector<std::string>& args);
+    bool estimate_fusion(const std::vector<std::string>& args);
+    bool optimize(const std::vector<std::string>& args);
+    bool sweep_dust(const std::vector<std::string>& args);
 
     bool ask_wallet_create_if_needed();
     std::string resolveAlias(const std::string& aliasUrl);
@@ -147,8 +146,8 @@ private:
 
     private:
         void update_blockchain_height() {
-            uint64_t blockchain_height = m_simple_wallet.m_node->getLastLocalBlockHeight();
-            m_blockchain_height = blockchain_height;
+            uint64_t blockchain_height      = m_simple_wallet.m_node->getLastLocalBlockHeight();
+            m_blockchain_height             = blockchain_height;
             m_blockchain_height_update_time = std::chrono::system_clock::now();
         }
 

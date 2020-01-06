@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <initializer_list>
+#include <boost/uuid/uuid.hpp>
 
 #pragma once
 
@@ -19,12 +20,12 @@ const uint64_t CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX       = 0xf0ec6; // addre
 const size_t   CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW          = 10;
 
 const uint64_t CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT            = 60 * 60 * 2;
-const uint64_t CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_V1				 = 360; /* changed for LWMA3 */
+const uint64_t CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT_V1         = 360; /* changed for LWMA3 */
 
 const size_t   BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW             = 60;
-const size_t   BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW_V1					 = 11; /* changed for LWMA3 */
+const size_t   BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW_V1          = 11; /* changed for LWMA3 */
 
-const uint64_t MONEY_SUPPLY				                           = UINT64_C(18446744000000000);
+const uint64_t MONEY_SUPPLY                                  = UINT64_C(18446744000000000);
 const uint64_t GENESIS_BLOCK_REWARD                          = UINT64_C(6456360400000000);
 const unsigned EMISSION_SPEED_FACTOR_V1                      = 19;
 const unsigned EMISSION_SPEED_FACTOR_V2                      = 20;
@@ -49,17 +50,17 @@ const uint64_t MAX_TX_MIXIN_SIZE                             = 12;
 const uint64_t DIFFICULTY_TARGET                             = 120; // seconds
 const uint64_t EXPECTED_NUMBER_OF_BLOCKS_PER_DAY             = 24 * 60 * 60 / DIFFICULTY_TARGET;
 const size_t   DIFFICULTY_WINDOW                             = 240; // blocks
-const size_t   DIFFICULTY_WINDOW_V1													 = DIFFICULTY_WINDOW;
-const size_t   DIFFICULTY_WINDOW_V2													 = DIFFICULTY_WINDOW;
-const size_t   DIFFICULTY_WINDOW_V3													 = 60; /* changed for LWMA3 */
-const size_t   DIFFICULTY_BLOCKS_COUNT											 = DIFFICULTY_WINDOW_V3 + 1; /* added for LWMA3 */
+const size_t   DIFFICULTY_WINDOW_V1                          = DIFFICULTY_WINDOW;
+const size_t   DIFFICULTY_WINDOW_V2									 = DIFFICULTY_WINDOW;
+const size_t   DIFFICULTY_WINDOW_V3									 = 60; /* changed for LWMA3 */
+const size_t   DIFFICULTY_BLOCKS_COUNT								 = DIFFICULTY_WINDOW_V3 + 1; /* added for LWMA3 */
 const size_t   DIFFICULTY_CUT                                = 30;  // timestamps to cut after sorting
-const size_t   DIFFICULTY_CUT_V1														 = DIFFICULTY_CUT;
-const size_t   DIFFICULTY_CUT_V2														 = DIFFICULTY_CUT;
+const size_t   DIFFICULTY_CUT_V1										 = DIFFICULTY_CUT;
+const size_t   DIFFICULTY_CUT_V2										 = DIFFICULTY_CUT;
 
 const size_t   DIFFICULTY_LAG                                = 15;
-const size_t   DIFFICULTY_LAG_V1														 = DIFFICULTY_LAG;
-const size_t   DIFFICULTY_LAG_V2														 = DIFFICULTY_LAG;
+const size_t   DIFFICULTY_LAG_V1										 = DIFFICULTY_LAG;
+const size_t   DIFFICULTY_LAG_V2										 = DIFFICULTY_LAG;
 
 static_assert(2 * DIFFICULTY_CUT <= DIFFICULTY_WINDOW - 2, "Bad DIFFICULTY_WINDOW or DIFFICULTY_CUT");
 
@@ -73,12 +74,15 @@ const uint64_t DEPOSIT_MIN_AMOUNT                            = 5000 * COIN;
 const uint32_t DEPOSIT_MIN_TERM                              = 1 * NUMBER_OF_BLOCKS_PER_DAY * 30;
 const uint32_t DEPOSIT_MAX_TERM                              = 1 * 12 * DEPOSIT_MIN_TERM;
 const uint64_t DEPOSIT_MIN_TOTAL_RATE_FACTOR                 = 0;
-const uint64_t DEPOSIT_MAX_TOTAL_RATE                        = 3;
+const uint64_t DEPOSIT_MAX_TOTAL_RATE                        = 6;
 const double   REMOTE_NODE_MIN_FEE                           = .0025;
 const int64_t  REMOTE_NODE_MAX_FEE                           = COIN * 100;
 static_assert(DEPOSIT_MIN_TERM > 0, "Bad DEPOSIT_MIN_TERM");
 static_assert(DEPOSIT_MIN_TERM <= DEPOSIT_MAX_TERM, "Bad DEPOSIT_MAX_TERM");
 static_assert(DEPOSIT_MIN_TERM * DEPOSIT_MAX_TOTAL_RATE > DEPOSIT_MIN_TOTAL_RATE_FACTOR, "Bad DEPOSIT_MIN_TOTAL_RATE_FACTOR or DEPOSIT_MAX_TOTAL_RATE");
+
+const uint64_t BLOCK_REWARD_BLOCK_MAJOR_V6                   = 25 * COIN;
+const uint64_t BLOCK_REWARD_TAIL_EMISSION                    =  5 * COIN;
 
 const size_t   MAX_BLOCK_SIZE_INITIAL                        = CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE * 10;
 const uint64_t MAX_BLOCK_SIZE_GROWTH_SPEED_NUMERATOR         = 100 * 1024;
@@ -99,7 +103,8 @@ const uint32_t UPGRADE_HEIGHT_V2                             = 1;
 const uint32_t UPGRADE_HEIGHT_V3                             = 2;
 const uint32_t UPGRADE_HEIGHT_V4                             = 75000;
 const uint32_t UPGRADE_HEIGHT_V5                             = 100000;
-const uint32_t UPGRADE_HEIGHT_V6                             = 999999999;
+const uint32_t UPGRADE_HEIGHT_V6                             = 170000;
+const uint32_t UPGRADE_HEIGHT_V7                             = 999999999;
 
 const unsigned UPGRADE_VOTING_THRESHOLD                      = 90;               // percent
 const size_t   UPGRADE_VOTING_WINDOW                         = EXPECTED_NUMBER_OF_BLOCKS_PER_DAY;  // blocks
@@ -130,6 +135,8 @@ const uint8_t  BLOCK_MAJOR_VERSION_3                         = 3;
 const uint8_t  BLOCK_MAJOR_VERSION_4                         = 4;
 const uint8_t  BLOCK_MAJOR_VERSION_5                         = 5;
 const uint8_t  BLOCK_MAJOR_VERSION_6                         = 6;
+const uint8_t  BLOCK_MAJOR_VERSION_7                         = 7;
+
 const uint8_t  BLOCK_MINOR_VERSION_0                         = 0;
 const uint8_t  BLOCK_MINOR_VERSION_1                         = 1;
 
@@ -155,32 +162,11 @@ const uint64_t P2P_DEFAULT_INVOKE_TIMEOUT                    = 60 * 2 * 1000; //
 const size_t   P2P_DEFAULT_HANDSHAKE_INVOKE_TIMEOUT          = 5000;          // 5 seconds
 const char     P2P_STAT_TRUSTED_PUB_KEY[]                    = "0000000000000000000000000000000000000000000000000000000011111111";
 
+const static boost::uuids::uuid CRYPTONOTE_NETWORK = { { 0x77, 0x6c, 0x66, 0x2e, 0x61, 0x64, 0x6f, 0x6e, 0x2e, 0x6e, 0x65, 0x74, 0x77, 0x6f, 0x72, 0x6b } };
+
 const std::initializer_list<const char*> SEED_NODES = {
    "01.seed.adon.network:19900",
    "02.seed.adon.network:19900"
-};
-
-struct CheckpointData {
-  uint32_t height;
-  const char* blockId;
-};
-
-#ifdef __GNUC__
-__attribute__((unused))
-#endif
-
-// You may add here other checkpoints using the following format:
-// {<block height>, "<block hash>"},
-const std::initializer_list<CheckpointData> CHECKPOINTS = {
-  {  5000, "f6ecfb7fd0527cf7baf51e6626cc921fa6db73403d9e33f2e8c78465926c3d0b" },
-  { 10000, "fe3cee2b2853395a19c3d4c9f15e5e354460f8e6e868313c9539016985498780" },
-  { 20000, "5c2bc247683f369d6aca1ddb1407e0d38f3cfda22d712f66acaac246514fa88e" },
-  { 30000, "2bbdf4349ae1a94d3178b4fa36f1fa8bb35caa518300a8f0be3a52ed4f057f22" },
-  { 40000, "8b70c42d72e9e4d36737d4c7d12fa3151db15426b6b20fc0c7aa112b2f53a095" },
-  { 50000, "42c5bc70a7aeeade1ec9853ab55c34a26e16bbe49c5fa3fa366c8a3a1258f6d7" },
-  { 60000, "9055e1a362c9711761cbcceb8c5d6fc993f896a9ec9e254807824462320dd782" },
-  { 65000, "1eaade74fee6f70821dee24260ef0deb67a0d9ba1dd58de4c8c6d09621894371" }
-
 };
 
 } // CryptoNote

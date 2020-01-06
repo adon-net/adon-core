@@ -35,7 +35,7 @@ struct TransactionDestinationEntry {
   uint64_t amount;                    //money
   AccountPublicAddress addr;          //destination address
 
-  TransactionDestinationEntry() : amount(0), addr(boost::value_initialized<AccountPublicAddress>()) {}
+  TransactionDestinationEntry() : amount(0), addr(CryptoNote::AccountPublicAddress()) {}
   TransactionDestinationEntry(uint64_t amount, const AccountPublicAddress &addr) : amount(amount), addr(addr) {}
 };
 
@@ -86,7 +86,7 @@ bool getRootBlockHashingBlob(const Block& b, BinaryArray& blob);
 bool get_aux_block_header_hash(const Block& b, Crypto::Hash& res);
 bool get_block_hash(const Block& b, Crypto::Hash& res);
 Crypto::Hash get_block_hash(const Block& b);
-bool get_block_longhash(Crypto::cn_context &context, const Block& b, Crypto::Hash& res);
+bool get_block_longhash(const Block& b, Crypto::Hash& res);
 bool get_inputs_money_amount(const Transaction& tx, uint64_t& money);
 uint64_t get_outs_money_amount(const Transaction& tx);
 bool check_inputs_types_supported(const TransactionPrefix& tx);
@@ -137,5 +137,6 @@ void decompose_amount_into_digits(uint64_t amount, uint64_t dust_threshold, cons
 void get_tx_tree_hash(const std::vector<Crypto::Hash>& tx_hashes, Crypto::Hash& h);
 Crypto::Hash get_tx_tree_hash(const std::vector<Crypto::Hash>& tx_hashes);
 Crypto::Hash get_tx_tree_hash(const Block& b);
+bool is_valid_decomposed_amount(uint64_t amount);
 
 }

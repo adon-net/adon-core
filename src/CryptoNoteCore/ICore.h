@@ -10,17 +10,16 @@
 #include <utility>
 #include <vector>
 #include <system_error>
+#include <functional>
 
 #include <CryptoNote.h>
 #include "CryptoNoteCore/Difficulty.h"
-
+#include "Rpc/CoreRpcServerCommandsDefinitions.h"
 #include "CryptoNoteCore/MessageQueue.h"
 #include "CryptoNoteCore/BlockchainMessages.h"
 
 namespace CryptoNote {
 
-struct COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_request;
-struct COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_response;
 struct NOTIFY_RESPONSE_GET_OBJECTS_request;
 struct NOTIFY_REQUEST_GET_OBJECTS_request;
 
@@ -63,7 +62,7 @@ public:
   virtual void get_blockchain_top(uint32_t& height, Crypto::Hash& top_id) = 0;
   virtual std::vector<Crypto::Hash> findBlockchainSupplement(const std::vector<Crypto::Hash>& remoteBlockIds, size_t maxCount,
     uint32_t& totalBlockCount, uint32_t& startBlockIndex) = 0;
-  virtual bool get_random_outs_for_amounts(const COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_request& req, COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS_response& res) = 0;
+  virtual bool get_random_outs_for_amounts(const COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::request& req, COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::response& res) = 0;
   virtual bool get_tx_outputs_gindexs(const Crypto::Hash& tx_id, std::vector<uint32_t>& indexs) = 0;
   virtual bool getOutByMSigGIndex(uint64_t amount, uint64_t gindex, MultisignatureOutput& out) = 0;
   virtual i_cryptonote_protocol* get_protocol() = 0;

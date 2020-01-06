@@ -102,7 +102,14 @@ bool Currency::generateGenesisBlock() {
 
 uint64_t Currency::baseRewardFunction(uint64_t alreadyGeneratedCoins, uint8_t blockMajorVersion) const {
   if (alreadyGeneratedCoins == 0) return parameters::GENESIS_BLOCK_REWARD;
-   
+
+  if(blockMajorVersion >= BLOCK_MAJOR_VERSION_6){
+    if(alreadyGeneratedCoins < m_moneySupply)
+      return parameters::BLOCK_REWARD_BLOCK_MAJOR_V6;
+    else
+      return parameters::BLOCK_REWARD_TAIL_EMISSION;
+  }
+
   if(blockMajorVersion >= BLOCK_MAJOR_VERSION_5)
     return (m_moneySupply - alreadyGeneratedCoins) >> m_emissionSpeedFactor_v3;
   if(blockMajorVersion >= BLOCK_MAJOR_VERSION_4)
@@ -138,24 +145,28 @@ uint64_t Currency::upgradeHeight(uint8_t majorVersion) const {
     return m_upgradeHeightV4;
   } else if (majorVersion == BLOCK_MAJOR_VERSION_5) {
     return m_upgradeHeightV5;
-  } else {
+  } else if (majorVersion == BLOCK_MAJOR_VERSION_6) {
+    return m_upgradeHeightV6;
+  }else {
     return static_cast<uint32_t>(-1);
   }
 }
 
-uint8_t getBlockMajorVersionForHeight(uint32_t height) {
-  if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V5) {
-    return BLOCK_MAJOR_VERSION_5;
-  } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V4) {
-    return BLOCK_MAJOR_VERSION_4;
-  } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V3) {
-    return BLOCK_MAJOR_VERSION_3;
-  } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V2) {
-    return BLOCK_MAJOR_VERSION_2;
-  } else {
-    return BLOCK_MAJOR_VERSION_1;
-  }
-}
+// uint8_t getBlockMajorVersionForHeight(uint32_t height) {
+//   if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V6) {
+//     return BLOCK_MAJOR_VERSION_6;
+//   } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V5) {
+//     return BLOCK_MAJOR_VERSION_5;
+//   } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V4) {
+//     return BLOCK_MAJOR_VERSION_4;
+//   } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V3) {
+//     return BLOCK_MAJOR_VERSION_3;
+//   } else if (height == CryptoNote::parameters::UPGRADE_HEIGHT_V2) {
+//     return BLOCK_MAJOR_VERSION_2;
+//   } else {
+//     return BLOCK_MAJOR_VERSION_1;
+//   }
+// }
 
 bool Currency::getBlockReward(uint8_t blockMajorVersion, size_t medianSize, size_t currentBlockSize, uint64_t alreadyGeneratedCoins,
   uint64_t fee, uint64_t& reward, int64_t& emissionChange) const {
@@ -309,8 +320,8 @@ bool Currency::constructMinerTx(uint8_t blockMajorVersion, uint32_t height, size
 
   uint64_t summaryAmounts = 0;
   for (size_t no = 0; no < outAmounts.size(); no++) {
-    Crypto::KeyDerivation derivation = boost::value_initialized<Crypto::KeyDerivation>();
-    Crypto::PublicKey outEphemeralPubKey = boost::value_initialized<Crypto::PublicKey>();
+    Crypto::KeyDerivation derivation;
+    Crypto::PublicKey outEphemeralPubKey;
 
     bool r = Crypto::generate_key_derivation(minerAddress.viewPublicKey, txkey.secretKey, derivation);
 
@@ -650,25 +661,25 @@ difficulty_type Currency::nextDifficultyV2(uint8_t blockMajorVersion, std::vecto
     // next_Target = sumTargets*L*2/0.998/T/(N+1)/N/N; // To show the difference.
 }
 
-bool Currency::checkProofOfWorkV1(Crypto::cn_context& context, const Block& block, difficulty_type currentDiffic,
+bool Currency::checkProofOfWorkV1(const Block& block, difficulty_type currentDiffic,
   Crypto::Hash& proofOfWork) const {
   if (block.majorVersion > BLOCK_MAJOR_VERSION_2) {
     return false;
   }
 
-  if (!get_block_longhash(context, block, proofOfWork)) {
+  if (!get_block_longhash(block, proofOfWork)) {
     return false;
   }
 
   return check_hash(proofOfWork, currentDiffic);
 }
 
-bool Currency::checkProofOfWorkV2(Crypto::cn_context& context, const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const {
+bool Currency::checkProofOfWorkV2(const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const {
   if (block.majorVersion < BLOCK_MAJOR_VERSION_2) {
     return false;
   }
 
-  if (!get_block_longhash(context, block, proofOfWork)) {
+  if (!get_block_longhash(block, proofOfWork)) {
     return false;
   }
 
@@ -703,15 +714,17 @@ bool Currency::checkProofOfWorkV2(Crypto::cn_context& context, const Block& bloc
   return true;
 }
 
-bool Currency::checkProofOfWork(Crypto::cn_context& context, const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const {
+bool Currency::checkProofOfWork(const Block& block, difficulty_type currentDiffic, Crypto::Hash& proofOfWork) const {
   switch (block.majorVersion) {
   case BLOCK_MAJOR_VERSION_1:
-    return checkProofOfWorkV1(context, block, currentDiffic, proofOfWork);
+    return checkProofOfWorkV1(block, currentDiffic, proofOfWork);
   case BLOCK_MAJOR_VERSION_2:
   case BLOCK_MAJOR_VERSION_3:
   case BLOCK_MAJOR_VERSION_4:
   case BLOCK_MAJOR_VERSION_5:
-    return checkProofOfWorkV2(context, block, currentDiffic, proofOfWork);
+  case BLOCK_MAJOR_VERSION_6:
+
+    return checkProofOfWorkV2(block, currentDiffic, proofOfWork);
   }
 
   logger(ERROR, BRIGHT_RED) << "Unknown block major version: " << block.majorVersion << "." << block.minorVersion;
@@ -799,6 +812,7 @@ CurrencyBuilder::CurrencyBuilder(Logging::ILogger& log) : m_currency(log) {
   upgradeHeightV3(parameters::UPGRADE_HEIGHT_V3);
   upgradeHeightV4(parameters::UPGRADE_HEIGHT_V4);
   upgradeHeightV5(parameters::UPGRADE_HEIGHT_V5);
+  upgradeHeightV6(parameters::UPGRADE_HEIGHT_V6);
 
   upgradeVotingThreshold(parameters::UPGRADE_VOTING_THRESHOLD);
   upgradeVotingWindow(parameters::UPGRADE_VOTING_WINDOW);
@@ -819,7 +833,7 @@ CurrencyBuilder::CurrencyBuilder(Logging::ILogger& log) : m_currency(log) {
 
 Transaction CurrencyBuilder::generateGenesisTransaction() {
   CryptoNote::Transaction tx;
-  CryptoNote::AccountPublicAddress ac = boost::value_initialized<CryptoNote::AccountPublicAddress>();
+  CryptoNote::AccountPublicAddress ac;
   m_currency.constructMinerTx(1,0, 0, 0, 0, 0, ac, tx); // zero fee in genesis
 
   return tx;

@@ -15,6 +15,7 @@
 #include <System/TcpConnection.h>
 #include <System/TcpConnector.h>
 
+#include <crypto/random.h>
 #include "Common/StdInputStream.h"
 #include "Common/StdOutputStream.h"
 #include "Serialization/BinaryInputStreamSerializer.h"
@@ -24,7 +25,6 @@
 #include "P2pConnectionProxy.h"
 #include "P2pContext.h"
 #include "P2pContextOwner.h"
-#include "P2pNetworks.h"
 
 using namespace Common;
 using namespace Logging;
@@ -64,7 +64,7 @@ private:
       return 0;
     }
 
-    size_t x = Crypto::rand<size_t>() % (maxIndex + 1);
+    size_t x = Random::randomValue<size_t>() % (maxIndex + 1);
     return (x * x * x) / (maxIndex * maxIndex);
   }
 

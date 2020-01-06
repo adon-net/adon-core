@@ -366,7 +366,7 @@ void NodeRpcProxy::relayTransaction(const CryptoNote::Transaction& transaction, 
 }
 
 void NodeRpcProxy::getRandomOutsByAmounts(std::vector<uint64_t>&& amounts, uint64_t outsCount,
-                                          std::vector<COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount>& outs,
+                                          std::vector<RandomOuts>& outs,
                                           const Callback& callback) {
   std::lock_guard<std::mutex> lock(m_mutex);
   if (m_state != STATE_INITIALIZED) {
@@ -524,7 +524,7 @@ std::error_code NodeRpcProxy::doRelayTransaction(const CryptoNote::Transaction& 
 }
 
 std::error_code NodeRpcProxy::doGetRandomOutsByAmounts(std::vector<uint64_t>& amounts, uint64_t outsCount,
-                                                       std::vector<COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount>& outs) {
+                                                       std::vector<RandomOuts>& outs) {
   COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::request req = AUTO_VAL_INIT(req);
   COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::response rsp = AUTO_VAL_INIT(rsp);
   req.amounts = std::move(amounts);

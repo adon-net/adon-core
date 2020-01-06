@@ -18,6 +18,7 @@
 #include "CryptoNoteSerialization.h"
 #include "TransactionExtra.h"
 #include "CryptoNoteTools.h"
+#include "Currency.h"
 
 #include "CryptoNoteConfig.h"
 
@@ -516,7 +517,8 @@ bool get_block_hash(const Block& b, Hash& res) {
 
   if (b.majorVersion == BLOCK_MAJOR_VERSION_3 || 
       b.majorVersion == BLOCK_MAJOR_VERSION_4 ||
-      b.majorVersion == BLOCK_MAJOR_VERSION_5) {
+      b.majorVersion == BLOCK_MAJOR_VERSION_5 ||
+      b.majorVersion == BLOCK_MAJOR_VERSION_6) {
     BinaryArray rootBlob;
     auto serializer = makeRootBlockSerializer(b, true, false);
     if (!toBinaryArray(serializer, rootBlob))
@@ -543,21 +545,26 @@ bool get_aux_block_header_hash(const Block& b, Hash& res) {
   return getObjectHash(blob, res);
 }
 
-bool get_block_longhash(cn_context &context, const Block& b, Hash& hash) {
+bool get_block_longhash(const Block& b, Hash& hash) {
   BinaryArray bd;
   if (b.majorVersion == BLOCK_MAJOR_VERSION_1 || b.majorVersion == BLOCK_MAJOR_VERSION_2) {
     if (!get_block_hashing_blob(b, bd)) {
       return false;
     }
-    cn_slow_hash_v0(context, bd.data(), bd.size(), hash);
+    cn_slow_hash_v0(bd.data(), bd.size(), hash);
   } else if (b.majorVersion == BLOCK_MAJOR_VERSION_3 || 
              b.majorVersion == BLOCK_MAJOR_VERSION_4 ||
              b.majorVersion == BLOCK_MAJOR_VERSION_5) {
     if (!getRootBlockHashingBlob(b, bd)) {
       return false;
     }
-    cn_lite_slow_hash_v1(context, bd.data(), bd.size(), hash);
-  } else {
+    cn_lite_slow_hash_v1(bd.data(), bd.size(), hash);
+  } else if (b.majorVersion == BLOCK_MAJOR_VERSION_6) {
+    if (!getRootBlockHashingBlob(b, bd)) {
+      return false;
+    }
+    chukwa_slow_hash(bd.data(), bd.size(), hash);
+  }else {
     return false;
   }
   return true;
@@ -602,4 +609,11 @@ Hash get_tx_tree_hash(const Block& b) {
   return get_tx_tree_hash(txs_ids);
 }
 
+bool is_valid_decomposed_amount(uint64_t amount) {
+  auto it = std::lower_bound(Currency::PRETTY_AMOUNTS.begin(), Currency::PRETTY_AMOUNTS.end(), amount);
+  if (it == Currency::PRETTY_AMOUNTS.end() || amount != *it) {
+	  return false;
+  }
+  return true;
+}
 }

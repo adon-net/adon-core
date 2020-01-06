@@ -9,13 +9,9 @@ if (STATIC AND MSVC)
 endif()
 
 add_subdirectory(miniupnpc)
-set_property(TARGET upnpc-static PROPERTY FOLDER "external")
+add_subdirectory(argon2)
 
-if (BUILD_TESTS)
-  add_subdirectory(gtest)
-  set_property(TARGET gtest gtest_main PROPERTY FOLDER "external")
-endif()
-
+set_property(TARGET upnpc-static argon2 PROPERTY FOLDER "external")
 
 if(MSVC)
   set_property(TARGET upnpc-static APPEND_STRING PROPERTY COMPILE_FLAGS " -wd4244 -wd4267")

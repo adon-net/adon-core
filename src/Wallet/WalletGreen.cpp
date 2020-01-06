@@ -40,6 +40,7 @@
 #include "WalletSerializationV2.h"
 #include "WalletErrors.h"
 #include "WalletUtils.h"
+#include <crypto/random.h>
 
 using namespace Common;
 using namespace Crypto;
@@ -318,10 +319,9 @@ void WalletGreen::initWithKeys(const std::string& path, const std::string& passw
   ContainerStorage newStorage(path, Common::FileMappedVectorOpenMode::CREATE, sizeof(ContainerStoragePrefix));
   ContainerStoragePrefix* prefix = reinterpret_cast<ContainerStoragePrefix*>(newStorage.prefix());
   prefix->version = static_cast<uint8_t>(WalletSerializerV2::SERIALIZATION_VERSION);
-  prefix->nextIv = Crypto::rand<Crypto::chacha8_iv>();
+  prefix->nextIv = Crypto::randomChachaIV();
 
-  Crypto::cn_context cnContext;
-  Crypto::generate_chacha8_key(cnContext, password, m_key);
+  Crypto::generate_chacha8_key(password, m_key);
 
   uint64_t creationTimestamp = time(nullptr);
   prefix->encryptedViewKeys = encryptKeyPair(viewPublicKey, viewSecretKey, creationTimestamp, m_key, prefix->nextIv);
@@ -357,10 +357,9 @@ void WalletGreen::initWithKeysAndTimestamp(const std::string& path, const std::s
   ContainerStorage newStorage(path, Common::FileMappedVectorOpenMode::CREATE, sizeof(ContainerStoragePrefix));
   ContainerStoragePrefix* prefix = reinterpret_cast<ContainerStoragePrefix*>(newStorage.prefix());
   prefix->version = static_cast<uint8_t>(WalletSerializerV2::SERIALIZATION_VERSION);
-  prefix->nextIv = Crypto::rand<Crypto::chacha8_iv>();
+  prefix->nextIv = Crypto::randomChachaIV();
 
-  Crypto::cn_context cnContext;
-  Crypto::generate_chacha8_key(cnContext, password, m_key);
+  Crypto::generate_chacha8_key(password, m_key);
 
   prefix->encryptedViewKeys = encryptKeyPair(viewPublicKey, viewSecretKey, _creationTimestamp, m_key, prefix->nextIv);
 
@@ -425,8 +424,7 @@ void WalletGreen::exportWallet(const std::string& path, bool encrypt, WalletSave
         if (encrypt) {
             newStorageKey = m_key;
         } else {
-            cn_context cnContext;
-            generate_chacha8_key(cnContext, "", newStorageKey);
+            generate_chacha8_key("", newStorageKey);
         }
 
         copyContainerStoragePrefix(m_containerStorage, m_key, newStorage, newStorageKey);
@@ -456,8 +454,7 @@ void WalletGreen::load(const std::string& path, const std::string& password, std
 
     stopBlockchainSynchronizer();
 
-    Crypto::cn_context cnContext;
-    generate_chacha8_key(cnContext, password, m_key);
+    generate_chacha8_key(password, m_key);
 
     std::ifstream walletFileStream(path, std::ios_base::binary);
     int           version = walletFileStream.peek();
@@ -682,7 +679,7 @@ void WalletGreen::copyContainerStoragePrefix(ContainerStorage& src, const chacha
   ContainerStoragePrefix* srcPrefix = reinterpret_cast<ContainerStoragePrefix*>(src.prefix());
   ContainerStoragePrefix* dstPrefix = reinterpret_cast<ContainerStoragePrefix*>(dst.prefix());
   dstPrefix->version = srcPrefix->version;
-  dstPrefix->nextIv = Crypto::rand<chacha8_iv>();
+  dstPrefix->nextIv = Crypto::randomChachaIV();
 
   Crypto::PublicKey publicKey;
   Crypto::SecretKey secretKey;
@@ -845,7 +842,7 @@ void WalletGreen::convertAndLoadWalletFile(const std::string& path, std::ifstrea
     m_containerStorage.open(tmpPath.string(), Common::FileMappedVectorOpenMode::CREATE, sizeof(ContainerStoragePrefix));
     ContainerStoragePrefix* prefix = reinterpret_cast<ContainerStoragePrefix*>(m_containerStorage.prefix());
     prefix->version                = WalletSerializerV2::SERIALIZATION_VERSION;
-    prefix->nextIv                 = Crypto::rand<Crypto::chacha8_iv>();
+    prefix->nextIv                 = Crypto::randomChachaIV();
 
     uint64_t creationTimestamp = time(nullptr);
     prefix->encryptedViewKeys  = encryptKeyPair(m_viewPublicKey, m_viewSecretKey, creationTimestamp);
@@ -885,9 +882,8 @@ void WalletGreen::changePassword(const std::string& oldPassword, const std::stri
     return;
   }
 
-  Crypto::cn_context cnContext;
   Crypto::chacha8_key newKey;
-  Crypto::generate_chacha8_key(cnContext, newPassword, newKey);
+  Crypto::generate_chacha8_key(newPassword, newKey);
 
   m_containerStorage.atomicUpdate([this, newKey](ContainerStorage& newStorage) {
     copyContainerStoragePrefix(m_containerStorage, m_key, newStorage, newKey);
@@ -1345,7 +1341,7 @@ void WalletGreen::prepareTransaction(std::vector<WalletOuts>&& wallets,
     throw std::system_error(make_error_code(error::WRONG_AMOUNT), "Not enough money");
   }
 
-  typedef CryptoNote::COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount outs_for_amount;
+  typedef CryptoNote::RandomOuts outs_for_amount;
   std::vector<outs_for_amount> mixinResult;
 
   if (mixIn != 0) {
@@ -1373,11 +1369,11 @@ void WalletGreen::prepareTransaction(std::vector<WalletOuts>&& wallets,
   preparedTransaction.transaction = makeTransaction(decomposedOutputs, keysInfo, extra, unlockTimestamp, txSecretKey);
 }
 
-void WalletGreen::checkIfEnoughMixins(std::vector<CryptoNote::COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount>& mixinResult, uint64_t mixIn) const {
+void WalletGreen::checkIfEnoughMixins(std::vector<CryptoNote::RandomOuts>& mixinResult, uint64_t mixIn) const {
   assert(mixIn != 0);
 
   auto notEnoughIt = std::find_if(mixinResult.begin(), mixinResult.end(),
-    [mixIn] (const CryptoNote::COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount& ofa) { return ofa.outs.size() < mixIn; } );
+    [mixIn] (const CryptoNote::RandomOuts& ofa) { return ofa.outs.size() < mixIn; } );
 
   // if (mixIn == 0 && mixinResult.empty()) {
   //   throw std::system_error(make_error_code(CryptoNote::error::MIXIN_COUNT_TOO_BIG));
@@ -2095,7 +2091,7 @@ std::unique_ptr<CryptoNote::ITransaction> WalletGreen::makeTransaction(const std
     }
   }
 
-  std::shuffle(amountsToAddresses.begin(), amountsToAddresses.end(), std::default_random_engine{Crypto::rand<std::default_random_engine::result_type>()});
+  std::shuffle(amountsToAddresses.begin(), amountsToAddresses.end(), Random::generator());
   std::sort(amountsToAddresses.begin(), amountsToAddresses.end(), [] (const AmountToAddress& left, const AmountToAddress& right) {
     return left.second < right.second;
   });
@@ -2216,7 +2212,7 @@ AccountKeys WalletGreen::makeAccountKeys(const WalletRecord& wallet) const {
 void WalletGreen::requestMixinOuts(
   const std::vector<OutputToTransfer>& selectedTransfers,
   uint64_t mixIn,
-  std::vector<CryptoNote::COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount>& mixinResult) {
+  std::vector<CryptoNote::RandomOuts>& mixinResult) {
 
   std::vector<uint64_t> amounts;
   for (const auto& out: selectedTransfers) {
@@ -2295,7 +2291,7 @@ uint64_t WalletGreen::selectTransfers(
     }
   }
 
-  ShuffleGenerator<size_t, Crypto::random_engine<size_t>> indexGenerator(walletOuts.size());
+  ShuffleGenerator<size_t> indexGenerator(walletOuts.size());
   while (foundMoney < neededMoney && !indexGenerator.empty()) {
     auto& out = walletOuts[indexGenerator()];
     foundMoney += out.second.amount;
@@ -2304,7 +2300,7 @@ uint64_t WalletGreen::selectTransfers(
   }
 
   if (dust && !dustOutputs.empty()) {
-    ShuffleGenerator<size_t, Crypto::random_engine<size_t>> dustIndexGenerator(dustOutputs.size());
+    ShuffleGenerator<size_t> dustIndexGenerator(dustOutputs.size());
     do {
       auto& out = dustOutputs[dustIndexGenerator()];
       foundMoney += out.second.amount;
@@ -2388,11 +2384,11 @@ CryptoNote::WalletGreen::ReceiverAmounts WalletGreen::splitAmount(
 
 void WalletGreen::prepareInputs(
   const std::vector<OutputToTransfer>& selectedTransfers,
-  std::vector<CryptoNote::COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount>& mixinResult,
+  std::vector<CryptoNote::RandomOuts>& mixinResult,
   uint64_t mixIn,
   std::vector<InputInfo>& keysInfo) {
 
-  typedef CryptoNote::COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::out_entry out_entry;
+  typedef CryptoNote::OutputEntry out_entry;
 
   size_t i = 0;
   for (const auto& input: selectedTransfers) {
@@ -3061,7 +3057,7 @@ size_t WalletGreen::createFusionTransaction(uint64_t threshold, uint64_t mixin,
     return WALLET_INVALID_TRANSACTION_ID;
   }
 
-  typedef CryptoNote::COMMAND_RPC_GET_RANDOM_OUTPUTS_FOR_AMOUNTS::outs_for_amount outs_for_amount;
+  typedef RandomOuts outs_for_amount;
   std::vector<outs_for_amount> mixinResult;
   if (mixin != 0) {
     requestMixinOuts(fusionInputs, mixin, mixinResult);
@@ -3237,7 +3233,7 @@ std::vector<WalletGreen::OutputToTransfer> WalletGreen::pickRandomFusionInputs(c
   //now, pick the bucket
   std::vector<uint8_t> bucketNumbers(bucketSizes.size());
   std::iota(bucketNumbers.begin(), bucketNumbers.end(), 0);
-  std::shuffle(bucketNumbers.begin(), bucketNumbers.end(), std::default_random_engine{Crypto::rand<std::default_random_engine::result_type>()});
+  std::shuffle(bucketNumbers.begin(), bucketNumbers.end(), std::default_random_engine{Random::randomValue<std::default_random_engine::result_type>()});
   size_t bucketNumberIndex = 0;
   for (; bucketNumberIndex < bucketNumbers.size(); ++bucketNumberIndex) {
     if (bucketSizes[bucketNumbers[bucketNumberIndex]] >= minInputCount) {
@@ -3274,7 +3270,7 @@ std::vector<WalletGreen::OutputToTransfer> WalletGreen::pickRandomFusionInputs(c
     return selectedOuts;
   }
 
-  ShuffleGenerator<size_t, Crypto::random_engine<size_t>> generator(selectedOuts.size());
+  ShuffleGenerator<size_t> generator(selectedOuts.size());
   std::vector<WalletGreen::OutputToTransfer> trimmedSelectedOuts;
   trimmedSelectedOuts.reserve(maxInputCount);
   for (size_t i = 0; i < maxInputCount; ++i) {

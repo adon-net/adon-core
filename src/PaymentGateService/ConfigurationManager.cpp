@@ -67,7 +67,7 @@ bool ConfigurationManager::init(int argc, char** argv) {
   }
 
   if (cmdOptions.count("version") > 0) {
-    std::cout << "walletd v" << PROJECT_VERSION_LONG;
+    std::cout << "wallet rpc v" << PROJECT_VERSION_LONG;
     return false;
   }
 

@@ -1,0 +1,197 @@
+language: cpp
+
+cache:
+  ccache: true
+  directories:
+  - "/home/travis/toolchain"
+
+matrix:
+  include:
+
+  # Ubuntu, gcc-9, g++-9, 64 Bit
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - libboost-all-dev
+        - g++-9
+        - gcc-9
+    env:
+    - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+    - STRIP="strip"
+    - _LABEL="linux"
+    - _OS_TAG="nix"
+    - _ADDRESS_MODE="x64"
+
+  # Ubuntu, gcc-8, g++-8, 64 Bit
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - libboost-all-dev
+        - g++-8
+        - gcc-8
+    env:
+    - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+    - STRIP="strip"
+    - _LABEL="linux"
+    - _OS_TAG="nix"
+    - _ADDRESS_MODE="x64"
+    - _DEPLOYABLE="true"
+
+  # Ubuntu, gcc-7, g++-7, 64 Bit
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - libboost-all-dev
+        - g++-7
+        - gcc-7
+    env:
+    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - STRIP="strip"
+    - _LABEL="linux"
+    - _OS_TAG="nix"
+    - _ADDRESS_MODE="x64"
+
+  # Ubuntu, gcc-7, g++-7, 32 Bit    
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-7
+        - gcc-7
+        - gcc-7-multilib
+        - g++-7-multilib
+        - gcc-multilib
+        - g++-multilib
+        - libc6-dev-i386
+    env:
+    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - STRIP="strip"
+    - _LABEL="linux"
+    - _OS_TAG="nix"
+    - _ADDRESS_MODE="x86"   
+    - _DEPLOYABLE="true"
+    - _ENV_ARCH="x86_64_x86"
+
+  # OSX, gcc-7, g++-7, 32 Bit    
+  - os: osx
+    osx_image: xcode11.2
+    compiler: gcc
+    env:
+    - MATRIX_EVAL="brew install gcc boost && CC=gcc-7 && CXX=g++-7
+    - STRIP="strip"
+    - _LABEL="osx"
+    - _OS_TAG="osx"
+    - _ADDRESS_MODE="x64"
+    - _DEPLOYABLE="true"
+    
+  # Ubuntu, arm-linux-gnueabihf-gcc, arm-linux-gnueabihf-g++, 32 Bit ;;  
+  # cross-pi-gcc-8.3.0 [pi zero, zero w, 1 ;; armv6]    
+  - os: linux
+    dist: xenial
+    env:
+    - MATRIX_EVAL="CC=arm-linux-gnueabihf-gcc && CXX=arm-linux-gnueabihf-g++"
+    - STRIP="arm-linux-gnueabihf-strip"
+    - _LABEL="linux"
+    - _OS_TAG="pi-armv6"
+    - _ADDRESS_MODE="x86"   
+    - _DEPLOYABLE="true"
+    - _ENV_ARCH="armv6_x86"
+
+  # Ubuntu, arm-linux-gnueabihf-gcc, arm-linux-gnueabihf-g++, 32 Bit ;; 
+  # cross-pi-gcc-8.3.0 [pi 2, 3 ;; armv7]    
+  - os: linux
+    dist: xenial
+    env:
+    - MATRIX_EVAL="CC=arm-linux-gnueabihf-gcc && CXX=arm-linux-gnueabihf-g++"
+    - STRIP="arm-linux-gnueabihf-strip"
+    - _LABEL="linux"
+    - _OS_TAG="pi-armv7"
+    - _ADDRESS_MODE="x86"   
+    - _DEPLOYABLE="true"
+    - _ENV_ARCH="armv7-a_x86"
+
+  # Ubuntu, arm-linux-gnueabihf-gcc, arm-linux-gnueabihf-g++, 32 Bit ;; 
+  # cross-pi-gcc-8.3.0 [pi 3+ ;; armv8]    
+  - os: linux
+    dist: xenial
+    env:
+    - MATRIX_EVAL="CC=arm-linux-gnueabihf-gcc && CXX=arm-linux-gnueabihf-g++"
+    - STRIP="arm-linux-gnueabihf-strip"
+    - _LABEL="linux"
+    - _OS_TAG="pi-armv8"
+    - _ADDRESS_MODE="x86"   
+    - _DEPLOYABLE="true"
+    - _ENV_ARCH="armv8-a_x86"    
+
+  # Ubuntu, aarch64-linux-gnu-gcc, aarch64-linux-gnu-g++, 64 Bit ;; 
+  # cross-pi-gcc-8.3.0 [pi 3+ ;; armv8]    
+  - os: linux
+    dist: xenial
+    env:
+    - MATRIX_EVAL="CC=aarch64-linux-gnu-gcc && CXX=aarch64-linux-gnu-g++"
+    - STRIP="arm-linux-gnueabihf-strip"
+    - _LABEL="linux"
+    - _OS_TAG="pi-armv8"
+    - _ADDRESS_MODE="x86"   
+    - _DEPLOYABLE="true"
+    - _ENV_ARCH="armv8-a_x64"
+
+before_install:
+- eval "${MATRIX_EVAL}"
+
+script:
+- eval "${MATRIX_EVAL}"
+- if [[ $_ENV_ARCH == "x86_64_x86" ]];  then source extras/prep-env.sh ; fi
+- if [[ $_ENV_ARCH == "armv6_x86" ]];   then source extras/prep-env.sh ; fi
+- if [[ $_ENV_ARCH == "armv7-a_x86" ]]; then source extras/prep-env.sh ; fi
+- if [[ $_ENV_ARCH == "armv8-a_x86" ]]; then source extras/prep-env.sh ; fi
+- if [[ $_ENV_ARCH == "armv8-a_x64" ]]; then source extras/prep-env.sh ; fi
+
+- cmake -DSTATIC=true -S . -Bbuild -DSTATIC=ON -DARCH=default -DCMAKE_TOOLCHAIN_FILE=${CUSTOM_TOOLCHAIN_FILE}
+- make -j$(nproc) -Cbuild
+
+before_deploy:
+- if [[ "${TRAVIS_TAG}" == "" ]]; then export TRAVIS_TAG=${TRAVIS_COMMIT} ; fi
+
+- cd build/src
+- TARGETS="adon-daemon adon-wallet-cli adon-wallet-rpc adon-miner"
+- "${STRIP} ${TARGETS}"
+- rm -rf adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}
+- mkdir adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}
+- cp ${TARGETS} adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}/
+- tar cvfz adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}/
+- rm -rf builds
+- mkdir builds
+- cp adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz builds/
+
+deploy:
+  provider: releases
+  api_key:
+    secure: z8F8JxaFxGGBYoY90qirkgiya7ttpJkFdmDuB8lzUEbwBDJ5VRd8UVA8SetcxQSobtxsjRgKpBJIYBRqMtXpWjwI/Vaowj0asIl8OFU3Hf2hFARycSEJPgpb9bYRbxjBoTIhD6SSjP1x4fZEGj8ZIOsVgTMtyTwOWMw/6GC2p22+43JJIOYJfzHEaPDPPbH+a0SRHPqQNn66ZXadqGgzNs3lQjL8SCb9wpEQBMZKgejyAjdaJDpol+IuOwq8uBDUDGJJqjYzukhobnlE2Dofg0UZJEvGLn5x+x61rjVARE5C5KXjqWSHxHR46Cm29l+18a44bvWa1kSr3SwUiDtyrJzGWvcclkbSkk7zdjL6jAsJnvge/+FajTZ74us/zXllcQ0xa8XKeQbNuRtdcs/s4gFhnGdPUo4Md4LKFhin5nPHyeF9zy2lHqQZ8Z8fHReAkt+vtaR3MN6sQjWZvYzeOW4z9/hKx3Z6IuqhH7Svl8Y04y9UkD9lxFZp0XLxGsPkRQEaR1RW8+v7nDwV6VBzhi9l+wWF/6PXP5ijI6Lsd1nC5E8d967AO5kSp2BK9EDnUuBA1zR3vRI63qh/b0N8MqBGfJgkwCzPsLtQRZv6wzmuejGH3FvEjRt+xhd6cZv2AoVz3s/Ba2T0bOza2raz1oSqhbcj53g7EjXbK96bs78=
+  file: 
+    - adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz
+  cleanup: false
+  on:
+    repo: adon-net/adon-core
+    branch: master
+    tags: true
+    condition: "$_DEPLOYABLE = true"

@@ -5,13 +5,13 @@
 
 #pragma  once
 
-#include <future>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include "WalletRpcServerCommandsDefinitions.h"
-#include "WalletLegacy/WalletLegacy.h"
+#include <future>
 #include "Common/CommandLine.h"
 #include "Rpc/HttpServer.h"
+#include "WalletLegacy/WalletLegacy.h"
+#include "WalletRpcServerCommandsDefinitions.h"
 
 #include <Logging/LoggerRef.h>
 
@@ -68,6 +68,10 @@ namespace Tools
 	  bool on_verify_message(const wallet_rpc::COMMAND_RPC_VERIFY_MESSAGE::request& req, wallet_rpc::COMMAND_RPC_VERIFY_MESSAGE::response& res);
     bool on_reset(const wallet_rpc::COMMAND_RPC_RESET::request& req, wallet_rpc::COMMAND_RPC_RESET::response& res);
     bool on_get_outputs(const wallet_rpc::COMMAND_RPC_GET_OUTPUTS::request& req, wallet_rpc::COMMAND_RPC_GET_OUTPUTS::response& res);
+    bool on_validate_address(const wallet_rpc::COMMAND_RPC_VALIDATE_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_VALIDATE_ADDRESS::response& res);
+    bool on_change_password(const wallet_rpc::COMMAND_RPC_CHANGE_PASSWORD::request& req, wallet_rpc::COMMAND_RPC_CHANGE_PASSWORD::response& res);
+    bool on_estimate_fusion(const wallet_rpc::COMMAND_RPC_ESTIMATE_FUSION::request& req, wallet_rpc::COMMAND_RPC_ESTIMATE_FUSION::response& res);
+    bool on_send_fusion(const wallet_rpc::COMMAND_RPC_SEND_FUSION::request& req, wallet_rpc::COMMAND_RPC_SEND_FUSION::response& res);
 
     bool handle_command_line(const boost::program_options::variables_map& vm);
 

@@ -188,27 +188,21 @@ void BlockchainExplorer::shutdown() {
   state.store(NOT_INITIALIZED);
 }
 
-bool BlockchainExplorer::getBlocks(const std::vector<uint32_t>& blockHeights, std::vector<std::vector<BlockDetails>>& blocks) {
+bool BlockchainExplorer::getBlocks(
+    const std::vector<uint32_t> &blockHeights,
+    std::vector<std::vector<BlockDetails>> &blocks) {
   if (state.load() != INITIALIZED) {
-    throw std::system_error(make_error_code(CryptoNote::error::BlockchainExplorerErrorCodes::NOT_INITIALIZED));
+    throw std::system_error(make_error_code(
+        CryptoNote::error::BlockchainExplorerErrorCodes::NOT_INITIALIZED));
   }
 
   logger(DEBUGGING) << "Get blocks by height request came.";
-  NodeRequest request(
-    std::bind(
-      static_cast<
-        void(INode::*)(
-        const std::vector<uint32_t>&,
-          std::vector<std::vector<BlockDetails>>&, 
-          const INode::Callback&
-        )
-      >(&INode::getBlocks), 
-      std::ref(node), 
-      std::cref(blockHeights), 
-      std::ref(blocks),
-      std::placeholders::_1
-    )
-  );
+  NodeRequest request(std::bind(
+      static_cast<void (INode::*)(const std::vector<uint32_t> &,
+                                  std::vector<std::vector<BlockDetails>> &,
+                                  const INode::Callback &)>(&INode::getBlocks),
+      std::ref(node), std::cref(blockHeights), std::ref(blocks),
+      std::placeholders::_1));
   std::error_code ec = request.performBlocking();
   if (ec) {
     logger(ERROR) << "Can't get blocks by height: " << ec.message();
@@ -447,11 +441,7 @@ uint64_t BlockchainExplorer::getFullRewardMaxBlockSize(uint8_t majorVersion) {
     throw std::system_error(make_error_code(CryptoNote::error::BlockchainExplorerErrorCodes::NOT_INITIALIZED));
   }
 
-  if (majorVersion >= BLOCK_MAJOR_VERSION_5) {
-      return parameters::CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE;
-  } else if (majorVersion == BLOCK_MAJOR_VERSION_4) {
-      return parameters::CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE;
-  } else if (majorVersion == BLOCK_MAJOR_VERSION_3) {
+  if (majorVersion >= BLOCK_MAJOR_VERSION_3) {
       return parameters::CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE;
   } else if (majorVersion == BLOCK_MAJOR_VERSION_2) {
       return parameters::CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V2;

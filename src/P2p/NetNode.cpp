@@ -30,6 +30,7 @@
 #include "Common/StdOutputStream.h"
 #include "Common/Util.h"
 #include "crypto/crypto.h"
+#include <crypto/random.h>
 
 #include "ConnectionContext.h"
 #include "LevinProtocol.h"
@@ -49,7 +50,7 @@ size_t get_random_index_with_fixed_probability(size_t max_index) {
   //divide by zero workaround
   if (!max_index)
     return 0;
-  size_t x = Crypto::rand<size_t>() % (max_index + 1);
+  size_t x = Random::randomValue<size_t>() % (max_index + 1);
   return (x*x*x) / (max_index*max_index); //parabola \/
 }
 
@@ -58,7 +59,7 @@ void addPortMapping(Logging::LoggerRef& logger, uint32_t port) {
   // Add UPnP port mapping
   logger(INFO) << "Attempting to add IGD port mapping.";
   int result;
-  UPNPDev* deviceList = upnpDiscover(1000, NULL, NULL, 0, 0, &result);
+  UPNPDev* deviceList = upnpDiscover(1000, NULL, NULL, 0, 0, 2, &result);
   UPNPUrls urls;
   IGDdatas igdData;
   char lanAddress[64];
@@ -193,7 +194,7 @@ namespace CryptoNote
     m_payload_handler(payload_handler),
     m_allow_local_ip(false),
     m_hide_my_port(false),
-    m_network_id(CRYPTONOTE_NETWORK),
+    m_network_id(CryptoNote::CRYPTONOTE_NETWORK),
     logger(log, "node_server"),
     m_stopEvent(m_dispatcher),
     m_idleTimer(m_dispatcher),
@@ -326,7 +327,7 @@ namespace CryptoNote
   //-----------------------------------------------------------------------------------
   bool NodeServer::make_default_config()
   {
-    m_config.m_peer_id  = Crypto::rand<uint64_t>();
+    m_config.m_peer_id  = Random::randomValue<uint64_t>();
     logger(INFO, BRIGHT_WHITE) << "Generated new peer ID: " << m_config.m_peer_id;
     return true;
   }
@@ -346,7 +347,7 @@ namespace CryptoNote
       for(const std::string& pr_str: perrs)
       {
         PeerlistEntry pe = boost::value_initialized<PeerlistEntry>();
-        pe.id = Crypto::rand<uint64_t>();
+        pe.id = Random::randomValue<uint64_t>();
         bool r = parse_peer_from_string(pe.adr, pr_str);
         if (!(r)) { logger(ERROR, BRIGHT_RED) << "Failed to parse address from string: " << pr_str; return false; }
         m_command_line_peers.push_back(pe);
@@ -826,7 +827,7 @@ namespace CryptoNote
 
     if(!m_peerlist.get_white_peers_count() && m_seed_nodes.size()) {
       size_t try_count = 0;
-      size_t current_index = Crypto::rand<size_t>() % m_seed_nodes.size();
+      size_t current_index = Random::randomValue<size_t>() % m_seed_nodes.size();
       
       while(true) {
         if(try_to_connect_and_handshake_with_new_peer(m_seed_nodes[current_index], true))
