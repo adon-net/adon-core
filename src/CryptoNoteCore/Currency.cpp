@@ -102,7 +102,14 @@ bool Currency::generateGenesisBlock() {
 
 uint64_t Currency::baseRewardFunction(uint64_t alreadyGeneratedCoins, uint8_t blockMajorVersion) const {
   if (alreadyGeneratedCoins == 0) return parameters::GENESIS_BLOCK_REWARD;
-   
+
+  if(blockMajorVersion >= BLOCK_MAJOR_VERSION_6){
+    if(alreadyGeneratedCoins < m_moneySupply)
+      return parameters::BLOCK_REWARD_BLOCK_MAJOR_V6;
+    else
+      return parameters::BLOCK_REWARD_TAIL_EMISSION;
+  }
+
   if(blockMajorVersion >= BLOCK_MAJOR_VERSION_5)
     return (m_moneySupply - alreadyGeneratedCoins) >> m_emissionSpeedFactor_v3;
   if(blockMajorVersion >= BLOCK_MAJOR_VERSION_4)
