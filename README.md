@@ -29,7 +29,7 @@
 
 ### **UBUNTU**
 
-- `sudo apt update && apt install -y  software-properties-common build-essential wget file cmake git libssl-dev`
+- `sudo apt update && apt install -y  software-properties-common build-essential wget file git libssl-dev`
 
 #### Install latest CMake
 
