@@ -25,45 +25,156 @@
 
 ## Building Adon Coin
 
-### On *nix:
+## **ON LINUX:**
 
-Dependencies: GCC 5.5.0 or later, CMake 3+ or later, and Boost 1.55 or later.
+### **UBUNTU**
 
-You may download them from:
+- `sudo apt update && apt install -y  software-properties-common build-essential wget file cmake git libssl-dev`
 
-- http://gcc.gnu.org/
-- http://www.cmake.org/
-- http://www.boost.org/
+#### Install latest CMake
 
-Alternatively, it may be possible to install them using a package manager.
+- `cd /tmp`
+- `wget https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2.tar.gz > /dev/null`
+- `tar xzvf cmake-3.16.2.tar.gz`
+- `cd cmake-3.16.2 && ./bootstrap`
+- `make -j$(proc)`
+- `sudo make install`
+  
+#### Install gcc-7 & g++-7  
 
-To build, change to a directory where this file is located, and run `make`. The resulting executables can be found in `build/release/src`.
+- `sudo add-apt-repository ppa:ubuntu-toolchain-r/test`
+- `sudo apt install g++-7 -y`
+- `sudo update-alternatives \`
+    `--install /usr/bin/gcc gcc /usr/bin/gcc-7 60 \`
+    `--slave /usr/bin/g++ g++ /usr/bin/g++-7 \`
+    `--slave /usr/bin/gcc-ar gcc-ar /usr/bin/gcc-ar-7 \`
+    `--slave /usr/bin/gcc-nm gcc-nm /usr/bin/gcc-nm-7 \`
+    `--slave /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-7`
 
-#### Advanced options:
+For 64-bit:
 
-Parallel build: run `make -j<number of threads>` instead of `make`.
+- `sudo apt install -y libboost-all-dev`
 
-Debug build: run `make build-debug`.
+#### Compile Adon Coin
 
-Test suite: run `make test-release` to run tests in addition to building. Running `make test-debug` will do the same to the debug version.
+  - `cd ~`
+  - `git clone -b master --single-branch https://github.com/adon-net/adon-core`
+  - `cd adon-core`
+  - `cmake -S . -Bbuild -DSTATIC=ON`
+  - `cmake --build build -j$(nproc)`
+  - You can find binaries under build/src folder.
 
-Building with Clang: it may be possible to use Clang instead of GCC, but this may not work everywhere. To build, run `export CC=clang CXX=clang++` before running `make`.
+  For 32-bit:
 
-### On Windows:
-Dependencies: MSVC 2013 or later, CMake 2.8.6 or later, and Boost 1.55 or later. You may download them from:
+  Install additional software required to compile 32 bit;
 
-- http://www.microsoft.com/
-- http://www.cmake.org/
-- http://www.boost.org/
+  - `apt install -y gcc-7-multilib g++-7-multilib libc6-dev-i386`
+    
+  You need to compile boost libraries from source code.
 
-To build, change to a directory where this file is located, and run this commands:
-```
-mkdir build
-cd build
-cmake -G "Visual Studio 12 Win64" ..
-```
+  - `cd /tmp`
+  - `wget https://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.gz`
+  - `tar xzvf boost_1_65_1.tar.gz`
+  - `cd boost_1_65_1`
+  - `export BOOST_ROOT=$HOME/local/boost_1_65_1/x86`
+  - `./bootstrap.sh`
+  - `./b2 -j8 \`
+      `cxxflags="-m32" linkflags="-m32" \`
+      `link=static address-model=32 architecture=x86 threading=multi \`
+      `--reconfigure --prefix=$BOOST_ROOT install --build-type=complete --layout=tagged \`
+      `--with-atomic --with-chrono --with-date_time --with-filesystem --with-program_options \`
+      `--with-regex --with-serialization --with-system --with-thread --with-context --with-coroutine > /dev/null`
 
+#### Compile Adon Coin
+
+  - `cd ~`
+  - `git clone -b master --single-branch https://github.com/adon-net/adon-core`
+  - `cd adon-core`
+  - `cmake -S . -Bbuild -DSTATIC=ON -DCMAKE_TOOLCHAIN_FILE=./extras/toolchain/cross-linux-x86.cmake`
+  - `cmake --build build -j$(nproc)`
+  - You can find binaries under build/src folder.
+ 
+
+## **RASPBERRY PI**
+
+  #### **CROSS COMPILE FOR PI 0 & 1**
+
+  `This part of the document will be updated soon`
+
+  #### **CROSS COMPILE FOR PI 2 & 3**
+
+  `This part of the document will be updated soon`
+
+  #### **CROSS COMPILE FOR PI 3+**
+
+  `This part of the document will be updated soon`
+
+## **ON WINDOWS:**
+
+#### PREREQUISITES
+ 
+- [Microsoft Visual Studio Build Tools 2017/2019](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16)
+- [CMake v3.8+](http://www.cmake.org/)
+- [Boost Library v1.65+](http://www.boost.org/)
+  - [Boost 64-bit](https://bintray.com/boostorg/release/download_file?file_path=1.69.0%2Fbinaries%2Fboost_1_69_0-msvc-14.1-64.exe)
+  - [Boost 32-bit](https://bintray.com/boostorg/release/download_file?file_path=1.69.0%2Fbinaries%2Fboost_1_69_0-msvc-14.1-32.exe)
+
+
+### WITH VISUAL STUDIO 2019
+
+For 64-bit:
+
+- From the start menu, open 'x64 Native Tools Command Prompt for VS 2019'.
+- `git clone -b master --single-branch https://github.com/adon-net/adon-core`
+- `cd adon-core`
+- `mkdir build`
+- `cd build`
+- `cmake -G "Visual Studio 16 2019" -A x64 .. -DBOOST_ROOT=C:/local/boost_1_69_0`
+- `MSBuild Adon.sln /p:Configuration=Release /m`
+
+For 32-bit:
+
+- From the start menu, open 'x86 Native Tools Command Prompt for VS 2019'.
+- `git clone -b master --single-branch https://github.com/adon-net/adon-core`
+- `cd adon-core`
+- `mkdir build`
+- `cd build`
+- `cmake -G "Visual Studio 16 2019" -A Win32 .. -DBOOST_ROOT=C:/local/boost_1_69_0`
+- `MSBuild Adon.sln /p:Configuration=Release /p:Platform=Win32 /m` 
+
+The binaries will be in the `src/Release` folder when you are complete.
+
+- `cd src`
+- `cd Release`
+- `adon-daemon.exe --version`
+
+### WITH VISUAL STUDIO 2017
+
+For 64-bit:
+
+- From the start menu, open 'x64 Native Tools Command Prompt for VS 2017'.
+- `git clone -b master --single-branch https://github.com/adon-net/adon-core`
+- `cd adon-core`
+- `mkdir build`
+- `cd build`
+- `cmake -G "Visual Studio 15 2017 Win64" .. -DBOOST_ROOT=C:/local/boost_1_69_0`
+- `MSBuild Adon.sln /p:Configuration=Release /m`
+
+For 32-bit:
+
+- From the start menu, open 'x86 Native Tools Command Prompt for VS 2017'.
+- `git clone -b master --single-branch https://github.com/adon-net/adon-core`
+- `cd adon-core`
+- `mkdir build`
+- `cd build`
+- `cmake -G "Visual Studio 15 2017" .. -DBOOST_ROOT=C:/local/boost_1_69_0`
+- `MSBuild Adon.sln /p:Configuration=Release /p:Platform=Win32 /m` 
+
+The binaries will be in the `src/Release` folder when you are complete.
+
+- `cd src`
+- `cd Release`
+- `adon-daemon.exe --version`
 
 And then do Build.
-
 Good luck!
