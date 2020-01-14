@@ -152,7 +152,7 @@ matrix:
     - STRIP="aarch64-linux-gnu-strip"
     - _LABEL="linux"
     - _OS_TAG="pi-armv8"
-    - _ADDRESS_MODE="x86"   
+    - _ADDRESS_MODE="x64"   
     - _DEPLOYABLE="true"
     - _ENV_ARCH="armv8-a_x64"
 
