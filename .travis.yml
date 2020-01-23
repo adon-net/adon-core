@@ -166,7 +166,7 @@ script:
 - if [[ $_ENV_ARCH == "armv8-a_x86" ]]; then source extras/prep-env.sh ; fi
 - if [[ $_ENV_ARCH == "armv8-a_x64" ]]; then source extras/prep-env.sh ; fi
 
-- cmake -DSTATIC=true -S . -Bbuild -DSTATIC=ON -DARCH=default -DCMAKE_TOOLCHAIN_FILE=${CUSTOM_TOOLCHAIN_FILE}
+- cmake -S . -Bbuild -DSTATIC=ON -DARCH=default -DCMAKE_TOOLCHAIN_FILE=${CUSTOM_TOOLCHAIN_FILE}
 - make -j$(nproc) -Cbuild
 
 before_deploy:
