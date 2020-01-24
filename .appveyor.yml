@@ -32,9 +32,12 @@ init:
   - pip install clcache
 
 install:
-  - ps: Write-Host "Checking for Boost 1.69.0 x64...";$boostdir  = Test-Path $Env:BOOST_LIB_PATH_X64;If ($boostdir -eq $False) {Write-Host "Downloading Boost 1.69.0 x64...";$exePath = "$Env:TEMP\boost_1_69_0-msvc-14.1-64.exe";(New-Object Net.WebClient).DownloadFile('https://bintray.com/boostorg/release/download_file?file_path=1.69.0%2Fbinaries%2Fboost_1_69_0-msvc-14.1-64.exe', $exePath);Write-Host "Installing Boost 1.69.0 x64...";cmd /c start /wait "$exePath" /verysilent;del $exePath};Write-Host "Boost 1.69.0 x64 installed!" -ForegroundColor Green
-  - ps: Write-Host "Checking for Boost 1.69.0 x86...";$boostdir  = Test-Path $Env:BOOST_LIB_PATH_X86;If ($boostdir -eq $False) {Write-Host "Downloading Boost 1.69.0 x86...";$exePath = "$Env:TEMP\boost_1_69_0-msvc-14.1-32.exe";(New-Object Net.WebClient).DownloadFile('https://bintray.com/boostorg/release/download_file?file_path=1.69.0%2Fbinaries%2Fboost_1_69_0-msvc-14.1-32.exe', $exePath);Write-Host "Installing Boost 1.69.0 x86...";cmd /c start /wait "$exePath" /verysilent;del $exePath};Write-Host "Boost 1.69.0 x86 installed!" -ForegroundColor Green
-
+  - ps: | 
+      if ("$env:PLATFORM" -eq "x64") { 
+        Write-Host "Checking for Boost 1.69.0 x64...";$boostdir  = Test-Path $Env:BOOST_LIB_PATH_X64;If ($boostdir -eq $False) {Write-Host "Downloading Boost 1.69.0 x64...";$exePath = "$Env:TEMP\boost_1_69_0-msvc-14.1-64.exe";(New-Object Net.WebClient).DownloadFile('https://bintray.com/boostorg/release/download_file?file_path=1.69.0%2Fbinaries%2Fboost_1_69_0-msvc-14.1-64.exe', $exePath);Write-Host "Installing Boost 1.69.0 x64...";cmd /c start /wait "$exePath" /verysilent;del $exePath};Write-Host "Boost 1.69.0 x64 installed!" -ForegroundColor Green
+      } else {
+        Write-Host "Checking for Boost 1.69.0 x86...";$boostdir  = Test-Path $Env:BOOST_LIB_PATH_X86;If ($boostdir -eq $False) {Write-Host "Downloading Boost 1.69.0 x86...";$exePath = "$Env:TEMP\boost_1_69_0-msvc-14.1-32.exe";(New-Object Net.WebClient).DownloadFile('https://bintray.com/boostorg/release/download_file?file_path=1.69.0%2Fbinaries%2Fboost_1_69_0-msvc-14.1-32.exe', $exePath);Write-Host "Installing Boost 1.69.0 x86...";cmd /c start /wait "$exePath" /verysilent;del $exePath};Write-Host "Boost 1.69.0 x86 installed!" -ForegroundColor Green
+      }
 
 before_build:
   - clcache -s
