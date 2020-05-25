@@ -13,7 +13,7 @@ BOOST_SRC=boost_${BOOST_VER//[.]/_}
 BOOST_SRC_FILE=$BOOST_SRC.tar.gz
 
 SOURCE_FORGE_PROJECT="https://sourceforge.net/projects"
-BASE_PI_32_URL="raspberry-pi-cross-compilers/files/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/GCC%208.3.0"
+BASE_PI_32_URL="raspberry-pi-cross-compilers/files/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Stretch/GCC%208.3.0"
 BASE_PI_64_URL="raspberry-pi-cross-compilers/files/Bonus%20Raspberry%20Pi%20GCC%2064-Bit%20Toolchains/Raspberry%20Pi%20GCC%2064-Bit%20Cross-Compiler%20Toolchains/GCC%208.3.0"
 BASE_BOOST_URL="boost/files/boost/$BOOST_VER"
 
