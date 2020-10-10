@@ -146,7 +146,7 @@ matrix:
   # Ubuntu, aarch64-linux-gnu-gcc, aarch64-linux-gnu-g++, 64 Bit ;; 
   # cross-pi-gcc-8.3.0 [pi 3+ ;; armv8]    
   - os: linux
-    dist: xenial
+    dist: bionic
     env:
     - MATRIX_EVAL="CC=aarch64-linux-gnu-gcc && CXX=aarch64-linux-gnu-g++"
     - STRIP="aarch64-linux-gnu-strip"
