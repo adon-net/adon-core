@@ -2125,7 +2125,7 @@ bool Blockchain::pushBlock(const Block& blockData, const std::vector<Transaction
   uint64_t reward = 0;
   uint64_t already_generated_coins = m_blocks.empty() ? 0 : m_blocks.back().already_generated_coins;
   if (!validate_miner_transaction(blockData, static_cast<uint32_t>(m_blocks.size()), cumulative_block_size, already_generated_coins, fee_summary, reward, emissionChange)) {
-    logger(INFO, BRIGHT_WHITE) << "Block " << blockHash << " has invalid miner transaction";
+    logger(INFO, BRIGHT_WHITE) << "Block " << m_blocks.size() << " # " << blockHash << " has invalid miner transaction";
     bvc.m_verifivation_failed = true;
     popTransactions(block, minerTransactionHash);
     return false;

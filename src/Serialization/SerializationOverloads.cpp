@@ -7,6 +7,10 @@
 
 #include <limits>
 
+#ifdef MSVC
+#include <exception></exception>
+#endif
+
 namespace CryptoNote {
 
 void serializeBlockHeight(ISerializer& s, uint32_t& blockHeight, Common::StringView name) {

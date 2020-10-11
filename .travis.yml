@@ -10,7 +10,7 @@ matrix:
 
   # Ubuntu, gcc-9, g++-9, 64 Bit
   - os: linux
-    dist: xenial
+    dist: bionic
     compiler: gcc
     addons:
       apt:
@@ -29,7 +29,7 @@ matrix:
 
   # Ubuntu, gcc-8, g++-8, 64 Bit
   - os: linux
-    dist: xenial
+    dist: bionic
     compiler: gcc
     addons:
       apt:
@@ -48,7 +48,7 @@ matrix:
 
   # Ubuntu, gcc-7, g++-7, 64 Bit
   - os: linux
-    dist: xenial
+    dist: bionic
     compiler: gcc
     addons:
       apt:
@@ -69,7 +69,7 @@ matrix:
 
   # Ubuntu, gcc-7, g++-7, 32 Bit    
   - os: linux
-    dist: xenial
+    dist: bionic
     compiler: gcc
     addons:
       apt:
@@ -107,7 +107,7 @@ matrix:
   # Ubuntu, arm-linux-gnueabihf-gcc, arm-linux-gnueabihf-g++, 32 Bit ;;  
   # cross-pi-gcc-8.3.0 [pi zero, zero w, 1 ;; armv6]    
   - os: linux
-    dist: xenial
+    dist: bionic
     env:
     - MATRIX_EVAL="CC=arm-linux-gnueabihf-gcc && CXX=arm-linux-gnueabihf-g++"
     - STRIP="arm-linux-gnueabihf-strip"
@@ -120,7 +120,7 @@ matrix:
   # Ubuntu, arm-linux-gnueabihf-gcc, arm-linux-gnueabihf-g++, 32 Bit ;; 
   # cross-pi-gcc-8.3.0 [pi 2, 3 ;; armv7]    
   - os: linux
-    dist: xenial
+    dist: bionic
     env:
     - MATRIX_EVAL="CC=arm-linux-gnueabihf-gcc && CXX=arm-linux-gnueabihf-g++"
     - STRIP="arm-linux-gnueabihf-strip"
@@ -133,7 +133,7 @@ matrix:
   # Ubuntu, arm-linux-gnueabihf-gcc, arm-linux-gnueabihf-g++, 32 Bit ;; 
   # cross-pi-gcc-8.3.0 [pi 3+ ;; armv8]    
   - os: linux
-    dist: xenial
+    dist: bionic
     env:
     - MATRIX_EVAL="CC=arm-linux-gnueabihf-gcc && CXX=arm-linux-gnueabihf-g++"
     - STRIP="arm-linux-gnueabihf-strip"
@@ -146,7 +146,7 @@ matrix:
   # Ubuntu, aarch64-linux-gnu-gcc, aarch64-linux-gnu-g++, 64 Bit ;; 
   # cross-pi-gcc-8.3.0 [pi 3+ ;; armv8]    
   - os: linux
-    dist: xenial
+    dist: bionic
     env:
     - MATRIX_EVAL="CC=aarch64-linux-gnu-gcc && CXX=aarch64-linux-gnu-g++"
     - STRIP="aarch64-linux-gnu-strip"
