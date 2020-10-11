@@ -9,8 +9,8 @@ configuration:
   - Release
 
 image:
-  # - Visual Studio 2019
-  - Visual Studio 2017
+  - Visual Studio 2019
+  # - Visual Studio 2017
 
 cache:
   - c:\users\appveyor\clcache
