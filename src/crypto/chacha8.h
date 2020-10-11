@@ -8,9 +8,13 @@
 #include <algorithm>
 #include <memory.h>
 
-constexpr inline int CHACHA8_KEY_SIZE = 32;
-constexpr inline int CHACHA8_IV_SIZE = 8;
-
+#if defined (__MSC_VER) && (__MSC_VER > 1900 )
+    constexpr inline int CHACHA8_KEY_SIZE = 32;
+    constexpr inline int CHACHA8_IV_SIZE = 8;
+#else
+    constexpr int CHACHA8_KEY_SIZE = 32;
+    constexpr int CHACHA8_IV_SIZE = 8;
+#endif
 namespace Crypto
 {
     void chacha8(const void* data, size_t length, const uint8_t* key, const uint8_t* iv, char* cipher);
