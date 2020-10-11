@@ -6,6 +6,7 @@
 #include "Serialization/SerializationOverloads.h"
 
 #include <limits>
+#include <stdexcept>
 
 #ifdef MSVC
 #include <exception></exception>
