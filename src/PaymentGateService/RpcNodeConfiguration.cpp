@@ -4,10 +4,14 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "RpcNodeConfiguration.h"
+#include "CryptoNoteConfig.h"
+
+using namespace CryptoNote;
 
 namespace PaymentService {
 
 namespace po = boost::program_options;
+
 
 RpcNodeConfiguration::RpcNodeConfiguration() {
   daemonHost = "";
@@ -15,9 +19,11 @@ RpcNodeConfiguration::RpcNodeConfiguration() {
 }
 
 void RpcNodeConfiguration::initOptions(boost::program_options::options_description& desc) {
+  const std::string DEFAULT_RPC_IP   = "127.0.0.1";
+  const uint16_t    DEFAULT_RPC_PORT = RPC_DEFAULT_PORT;
   desc.add_options()
-    ("daemon-address", po::value<std::string>()->default_value("localhost"), "daemon address")
-    ("daemon-port", po::value<uint16_t>()->default_value(8081), "daemon port");
+    ("daemon-address", po::value<std::string>()->default_value(DEFAULT_RPC_IP), "daemon address")
+    ("daemon-port", po::value<uint16_t>()->default_value(DEFAULT_RPC_PORT), "daemon port");
 }
 
 void RpcNodeConfiguration::init(const boost::program_options::variables_map& options) {
