@@ -176,20 +176,20 @@ before_deploy:
 - cd build/src
 - TARGETS="adon-daemon adon-wallet-cli adon-wallet-rpc adon-miner"
 - "${STRIP} ${TARGETS}"
-- rm -rf adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}
-- mkdir adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}
-- cp ${TARGETS} adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}/
-- tar cvfz adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}/
+- rm -rf adon-cli-${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}
+- mkdir adon-cli-${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}
+- cp ${TARGETS} adon-cli-${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}/
+- tar cvfz adon-cli-${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz adon-cli-${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}/
 - rm -rf builds
 - mkdir builds
-- cp adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz builds/
+- cp adon-cli-${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz builds/
 
 deploy:
   provider: releases
   api_key:
     secure: z8F8JxaFxGGBYoY90qirkgiya7ttpJkFdmDuB8lzUEbwBDJ5VRd8UVA8SetcxQSobtxsjRgKpBJIYBRqMtXpWjwI/Vaowj0asIl8OFU3Hf2hFARycSEJPgpb9bYRbxjBoTIhD6SSjP1x4fZEGj8ZIOsVgTMtyTwOWMw/6GC2p22+43JJIOYJfzHEaPDPPbH+a0SRHPqQNn66ZXadqGgzNs3lQjL8SCb9wpEQBMZKgejyAjdaJDpol+IuOwq8uBDUDGJJqjYzukhobnlE2Dofg0UZJEvGLn5x+x61rjVARE5C5KXjqWSHxHR46Cm29l+18a44bvWa1kSr3SwUiDtyrJzGWvcclkbSkk7zdjL6jAsJnvge/+FajTZ74us/zXllcQ0xa8XKeQbNuRtdcs/s4gFhnGdPUo4Md4LKFhin5nPHyeF9zy2lHqQZ8Z8fHReAkt+vtaR3MN6sQjWZvYzeOW4z9/hKx3Z6IuqhH7Svl8Y04y9UkD9lxFZp0XLxGsPkRQEaR1RW8+v7nDwV6VBzhi9l+wWF/6PXP5ijI6Lsd1nC5E8d967AO5kSp2BK9EDnUuBA1zR3vRI63qh/b0N8MqBGfJgkwCzPsLtQRZv6wzmuejGH3FvEjRt+xhd6cZv2AoVz3s/Ba2T0bOza2raz1oSqhbcj53g7EjXbK96bs78=
   file: 
-    - adon-cli.${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz
+    - adon-cli-${TRAVIS_TAG}-${_OS_TAG}.${_ADDRESS_MODE}.tar.gz
   skip_cleanup: true
   on:
     repo: adon-net/adon-core
