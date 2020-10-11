@@ -177,10 +177,10 @@ bool RpcServer::processJsonRpcRequest(const HttpRequest& request, HttpResponse& 
         {"transaction_hashes_by_payment_id", { makeMemberMethod(&RpcServer::onGetTransactionHashesByPaymentId), false } },
         {"transaction_details_by_hashes", { makeMemberMethod(&RpcServer::onGetTransactionsDetailsByHashes), false } },
         {"transaction_details_by_hash", { makeMemberMethod(&RpcServer::onGetTransactionDetailsByHash), false } },
+        {"block_details_by_height", { makeMemberMethod(&RpcServer::onGetBlockDetailsByHeight), false } },
         {"blocks_details_by_heights", { makeMemberMethod(&RpcServer::onGetBlocksDetailsByHeights), false } },
         {"blocks_details_by_hashes", { makeMemberMethod(&RpcServer::onGetBlocksDetailsByHashes), false } },
         {"blocks_hashes_by_timestamps", { makeMemberMethod(&RpcServer::onGetBlocksHashesByTimestamps), false } },
-        {"block_details_by_height", { makeMemberMethod(&RpcServer::onGetBlockDetailsByHeight), false } },
         {"check_tx_with_view_key", {makeMemberMethod(&RpcServer::on_check_tx_with_view_key), false}},
         {"check_tx_key", { makeMemberMethod(&RpcServer::on_check_tx_key), false } },
         {"check_tx_proof", {makeMemberMethod(&RpcServer::on_check_tx_proof), false}},
@@ -761,7 +761,6 @@ bool RpcServer::on_submitblock(const COMMAND_RPC_SUBMITBLOCK::request& req, COMM
   return true;
 }
 
-
 namespace {
   uint64_t get_block_reward(const Block& blk) {
     uint64_t reward = 0;
@@ -772,18 +771,31 @@ namespace {
   }
 }
 
-void RpcServer::fill_block_header_response(const Block& blk, bool orphan_status, uint64_t height, const Hash& hash, block_header_response& responce) {
-  responce.major_version = blk.majorVersion;
-  responce.minor_version = blk.minorVersion;
-  responce.timestamp = blk.timestamp;
-  responce.prev_hash = Common::podToHex(blk.previousBlockHash);
-  responce.nonce = blk.nonce;
-  responce.orphan_status = orphan_status;
-  responce.height = height;
-  responce.depth = m_core.get_current_blockchain_height() - height - 1;
-  responce.hash = Common::podToHex(hash);
-  m_core.getBlockDifficulty(static_cast<uint32_t>(height), responce.difficulty);
-  responce.reward = get_block_reward(blk);
+void RpcServer::fill_block_header_response(const Block& blk, bool orphan_status, uint64_t height, const Hash& hash, block_header_response& response) {
+  response.major_version = blk.majorVersion;
+  response.minor_version = blk.minorVersion;
+  response.timestamp = blk.timestamp;
+  response.prev_hash = Common::podToHex(blk.previousBlockHash);
+  response.nonce = blk.nonce;
+  response.orphan_status = orphan_status;
+  response.height = height;
+  response.depth = m_core.get_current_blockchain_height() - height - 1;
+  response.hash = Common::podToHex(hash);
+  m_core.getBlockDifficulty(static_cast<uint32_t>(height), response.difficulty);
+  // response.tx_count = blk.transactions.size()
+  // size_t tx_cumulative_block_size;
+  // size_t blokBlobSize    = getObjectBinarySize(blk);
+  // size_t minerTxBlobSize = getObjectBinarySize(blk.baseTransaction);
+    
+  // m_core.getBlockSize(hash, tx_cumulative_block_size);
+  BlockDetailsEx blockDetails;
+  if (!m_core.fillBlockDetails(blk, blockDetails)) {
+    throw JsonRpc::JsonRpcError{ CORE_RPC_ERROR_CODE_INTERNAL_ERROR, "Internal error: can't fill block details." };
+  }
+
+  response.tx_count = blockDetails.transactions.size();
+  response.block_size = blockDetails.blockSize;
+  response.reward = get_block_reward(blk);
 }
 
 bool RpcServer::on_get_last_block_header(const COMMAND_RPC_GET_LAST_BLOCK_HEADER::request& req, COMMAND_RPC_GET_LAST_BLOCK_HEADER::response& res) {
@@ -847,8 +859,6 @@ bool RpcServer::on_get_block_header_by_height(const COMMAND_RPC_GET_BLOCK_HEADER
   res.status = CORE_RPC_STATUS_OK;
   return true;
 }
-
-
 
 bool RpcServer::f_on_blocks_list_json(const F_COMMAND_RPC_GET_BLOCKS_LIST::request& req, F_COMMAND_RPC_GET_BLOCKS_LIST::response& res) {
     if (m_core.get_current_blockchain_height() <= req.height) {
@@ -1211,7 +1221,6 @@ bool RpcServer::on_transactions_by_payment_id(const COMMAND_RPC_GET_TRANSACTIONS
     return true;
 }
 
-
 bool RpcServer::onGetBlocksDetailsByHeights(const COMMAND_RPC_GET_BLOCKS_DETAILS_BY_HEIGHTS::request& req, COMMAND_RPC_GET_BLOCKS_DETAILS_BY_HEIGHTS::response& rsp) {
   try {
     std::vector<BlockDetailsEx> blockDetails;
@@ -1283,7 +1292,7 @@ bool RpcServer::onGetBlockDetailsByHeight(const COMMAND_RPC_GET_BLOCK_DETAILS_BY
     if (!m_core.getBlockByHash(block_hash, blk)) {
       throw JsonRpc::JsonRpcError{ CORE_RPC_ERROR_CODE_INTERNAL_ERROR,
         "Internal error: can't get block by height " + std::to_string(req.blockHeight) + '.' };
-	}
+	  }
     if (!m_core.fillBlockDetails(blk, blockDetails)) {
       throw JsonRpc::JsonRpcError{ CORE_RPC_ERROR_CODE_INTERNAL_ERROR, "Internal error: can't fill block details." };
     }

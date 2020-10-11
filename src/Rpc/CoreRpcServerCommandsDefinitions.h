@@ -436,6 +436,8 @@ struct block_header_response {
   std::string hash;
   difficulty_type difficulty;
   uint64_t reward;
+  uint32_t tx_count;
+  uint64_t block_size;
 
   void serialize(ISerializer &s) {
     KV_MEMBER(major_version)
@@ -449,6 +451,8 @@ struct block_header_response {
     KV_MEMBER(hash)
     KV_MEMBER(difficulty)
     KV_MEMBER(reward)
+    KV_MEMBER(tx_count)
+    KV_MEMBER(block_size)
   }
 };
 
